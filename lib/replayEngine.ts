@@ -1,15 +1,11 @@
 import { ReplayEvent } from '@/types/event';
 
 export function reconstructState(events: ReplayEvent[], targetTime: string) {
-  // Start with specified initial policy
-  const state: any = {
-    name: "Standard Auto",
-    premium: 1000,
-    coverageLimit: 50000,
-    status: "Active"
-  };
+  let state: any = null;
+  const steps: { event: ReplayEvent; resultingState: any }[] = [];
+  const progression: string[] = [];
 
-  if (!targetTime) return state;
+  if (!targetTime) return { state, steps, progression };
 
   const targetDate = new Date(targetTime).getTime();
 
@@ -18,8 +14,51 @@ export function reconstructState(events: ReplayEvent[], targetTime: string) {
     .slice() // copy array before sorting
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
     .forEach(event => {
-      state[event.field] = event.newValue;
+      switch (event.type) {
+        case 'POLICY_CREATED':
+          state = { ...event.payload };
+          if (!progression.includes('Draft')) progression.push('Draft');
+          break;
+        case 'POLICY_QUOTED':
+          if (state && event.payload?.premium !== undefined) {
+            state.premium = event.payload.premium;
+          }
+          if (!progression.includes('Quoted')) progression.push('Quoted');
+          break;
+        case 'POLICY_BOUND':
+          if (state) state.status = 'Active';
+          if (!progression.includes('Active')) progression.push('Active');
+          break;
+        case 'POLICY_ENDORSED':
+          if (state) {
+            if (event.payload?.coverageLimit !== undefined) {
+              state.coverageLimit = event.payload.coverageLimit;
+            }
+            if (event.payload?.premium !== undefined) {
+              state.premium = event.payload.premium;
+            }
+            if (!progression.includes('Endorsed')) progression.push('Endorsed');
+          }
+          break;
+        case 'POLICY_CANCELLED':
+          if (state) state.status = 'Cancelled';
+          if (!progression.includes('Cancelled')) progression.push('Cancelled');
+          break;
+        case 'CLAIM_REPORTED':
+          if (state) state.status = 'Claim Open';
+          if (!progression.includes('Claim Reported')) progression.push('Claim Reported');
+          break;
+        case 'CLAIM_APPROVED':
+          if (state) state.status = 'Claim Approved';
+          if (!progression.includes('Claim Approved')) progression.push('Claim Approved');
+          break;
+      }
+      
+      steps.push({
+        event,
+        resultingState: state ? { ...state } : null
+      });
     });
 
-  return state;
+  return { state, steps, progression };
 }
