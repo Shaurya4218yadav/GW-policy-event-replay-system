@@ -1,15 +1,14 @@
+import { useState } from 'react';
 import { ReplayEvent } from '@/types/event';
 
 interface EventTimelineProps {
   events: ReplayEvent[];
-}
-
-interface EventTimelineProps {
-  events: ReplayEvent[];
   activeTimestamp?: string | null;
+  isFocusMode?: boolean;
 }
 
-export default function EventTimeline({ events, activeTimestamp }: EventTimelineProps) {
+export default function EventTimeline({ events, activeTimestamp, isFocusMode }: EventTimelineProps) {
+  const [activeFilter, setActiveFilter] = useState<'all' | 'anomalies' | 'financial' | 'lifecycle'>('all');
   const lastUpdated = events.length > 0 ? new Date(events[events.length - 1].timestamp).toLocaleTimeString() : 'N/A';
 
   const isActive = (timestamp: string) => {
@@ -21,73 +20,187 @@ export default function EventTimeline({ events, activeTimestamp }: EventTimeline
     if (!active) return "border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/10 text-slate-400 dark:text-slate-700 opacity-40";
     
     switch (type) {
-      case 'POLICY_CREATED': return 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300';
-      case 'POLICY_QUOTED': return 'border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300';
-      case 'POLICY_BOUND': return 'border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-300';
-      case 'POLICY_ENDORSED': return 'border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300';
-      case 'POLICY_CANCELLED': return 'border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300';
-      default: return 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300';
+      case 'POLICY_CREATED': return 'border-white/10 bg-white/5 text-text-primary';
+      case 'POLICY_QUOTED': return 'border-accent/20 bg-accent/5 text-accent';
+      case 'POLICY_BOUND': return 'border-status-success/20 bg-status-success/5 text-status-success';
+      case 'POLICY_ENDORSED': return 'border-accent-secondary/20 bg-accent-secondary/5 text-accent-secondary';
+      case 'POLICY_CANCELLED': return 'border-status-error/20 bg-status-error/5 text-status-error';
+      default: return 'border-white/10 bg-white/5 text-text-primary';
     }
   };
 
   const getDotClass = (type: string, active: boolean) => {
-    if (!active) return "bg-slate-300 dark:bg-slate-800";
+    if (!active) return "bg-bg-elevated border border-white/5";
     switch (type) {
-      case 'POLICY_CREATED': return 'bg-slate-400 dark:bg-slate-500 shadow-[0_0_8px_rgba(100,116,139,0.5)]';
-      case 'POLICY_QUOTED': return 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]';
-      case 'POLICY_BOUND': return 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]';
-      case 'POLICY_ENDORSED': return 'bg-purple-500 shadow-[0_0_8px_rgba(139,92,246,0.5)]';
-      default: return 'bg-slate-400 dark:bg-slate-500 shadow-[0_0_8px_rgba(100,116,139,0.5)]';
+      case 'POLICY_CREATED': return 'bg-text-dim shadow-[0_0_10px_rgba(110,118,129,0.3)]';
+      case 'POLICY_QUOTED': return 'bg-accent shadow-[0_0_15px_rgba(34,211,238,0.4)]';
+      case 'POLICY_BOUND': return 'bg-status-success shadow-[0_0_15px_rgba(34,197,94,0.4)]';
+      case 'POLICY_ENDORSED': return 'bg-accent-secondary shadow-[0_0_15px_rgba(139,92,246,0.4)]';
+      default: return 'bg-accent shadow-[0_0_10px_var(--accent-primary)]';
     }
   };
 
+  const calculateDelta = (key: string, currentValue: any, currentIndex: number) => {
+    if (typeof currentValue !== 'number') return null;
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      const pastEvent = events[i];
+      if (pastEvent.payload && typeof pastEvent.payload[key] === 'number') {
+        const pastValue = pastEvent.payload[key];
+        const diff = currentValue - pastValue;
+        if (diff === 0) return null;
+        
+        const deltaStr = diff > 0 ? `(↑ +₹${diff.toLocaleString()})` : `(↓ -₹${Math.abs(diff).toLocaleString()})`;
+        
+        // ANOMALY DETECTION: > 50% change or > ₹5,000
+        const isAnomaly = Math.abs(diff) > (pastValue * 0.5) || Math.abs(diff) > 5000;
+        
+        return { 
+          text: deltaStr, 
+          isAnomaly, 
+          isPositive: diff > 0 
+        };
+      }
+    }
+    return null;
+  };
+
+  const generateTelemetry = (event: ReplayEvent) => {
+     const hash = "0x" + event.id.replace(/-/g, "").substring(0, 10);
+     const code = event.timestamp.charCodeAt(event.timestamp.length - 1) || 1;
+     const ttc = (code * 3 + 12) + "ms";
+     return { hash, ttc };
+  };
+
+  const filteredEvents = events.filter(event => {
+    if (activeFilter === 'all') return true;
+    
+    const delta = calculateDelta('premium', event.payload?.premium, events.indexOf(event)) || 
+                  calculateDelta('coverageLimit', event.payload?.coverageLimit, events.indexOf(event));
+    
+    if (activeFilter === 'anomalies') return delta?.isAnomaly;
+    
+    if (activeFilter === 'financial') {
+      return ['POLICY_QUOTED', 'POLICY_ENDORSED', 'CLAIM_APPROVED'].includes(event.type);
+    }
+    
+    if (activeFilter === 'lifecycle') {
+      return ['POLICY_CREATED', 'POLICY_BOUND', 'POLICY_CANCELLED'].includes(event.type);
+    }
+    
+    return true;
+  });
+
   return (
-    <div className="relative py-12 flex flex-col items-center transition-colors duration-300">
-      {/* Central Timeline Line */}
-      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2" />
+    <div className="relative py-32 flex flex-col items-center min-h-[80vh]">
+      {/* FILTER HUD */}
+      <div className="sticky top-16 z-20 mb-20 flex items-center gap-1 p-0.5 glass-panel rounded-full relative">
+        {(['all', 'anomalies', 'financial', 'lifecycle'] as const).map(f => (
+          <button
+            key={f}
+            onClick={() => setActiveFilter(f)}
+            className={`px-5 py-1 rounded-full font-mono text-[8px] uppercase tracking-[0.2em] transition-all relative overflow-hidden group ${
+              activeFilter === f 
+                ? 'text-white' 
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            {activeFilter === f && (
+              <div className="absolute inset-0 bg-signal-gradient animate-signal-pulse -z-10" />
+            )}
+            <span className="relative z-10">{f}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Central Axis */}
+      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-accent/20 to-transparent -translate-x-1/2 z-0" />
 
       {events.length === 0 ? (
-        <div className="text-slate-500 font-mono text-[10px] uppercase tracking-widest mt-12 bg-background px-4 z-10">
-          Listening for system signals...
+        <div className="forensic-text uppercase tracking-[0.3em] mt-24 opacity-30 animate-pulse">
+          Awaiting_System_Signals...
         </div>
       ) : (
-        <div className="w-full max-w-[800px] space-y-12 transition-all">
-          {events.map((event, idx) => {
+        <div className="w-full max-w-[1000px] relative z-10">
+          {filteredEvents.map((event, idx) => {
             const active = isActive(event.timestamp);
             const isLeft = idx % 2 === 0;
+            const isCurrentHead = idx === events.length - 1;
+            const isDimmed = isFocusMode && !isCurrentHead;
+            const telemetry = generateTelemetry(event);
+
+            // Vary vertical spacing for organic feel
+            const dynamicSpacing = idx % 3 === 0 ? 'pb-32' : 'pb-20';
 
             return (
-              <div key={event.id} className={`flex items-center w-full group transition-all duration-700 ease-in-out`}>
-                <div className={`w-1/2 flex items-center ${isLeft ? "justify-end pr-12 order-1" : "order-3 pl-12 justify-start"}`}>
-                  <div className={`p-4 border rounded-lg max-w-xs shadow-sm dark:shadow-none transition-all duration-500 ${getEventBadgeClass(event.type, active)}`}>
-                    <div className="flex justify-between items-start mb-2 opacity-50">
-                      <span className="text-[9px] font-mono whitespace-nowrap">
-                        {new Date(event.timestamp).toLocaleTimeString([], { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                      </span>
-                      <span className="text-[9px] font-bold uppercase tracking-tighter">SIGNAL S-0{idx + 1}</span>
-                    </div>
-                    <div className="font-mono text-xs font-bold uppercase tracking-tight">
-                      {event.type.replace(/_/g, " ")}
-                    </div>
-                    {event.payload && active && (
-                      <div className="mt-3 text-[10px] font-mono leading-relaxed p-2 bg-black/5 dark:bg-black/40 rounded border border-black/5 dark:border-white/5 opacity-80">
-                        {Object.entries(event.payload).map(([k, v]) => (
-                          <div key={k} className="flex space-x-2">
-                            <span className="text-slate-400 dark:text-slate-500">{k}:</span>
-                            <span className="text-blue-600 dark:text-blue-400 font-bold">{String(v)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+              <div 
+                key={event.id} 
+                className={`flex items-center w-full group transition-all duration-700 ${dynamicSpacing} ${isDimmed ? 'opacity-20 blur-[2px] scale-95' : 'opacity-100'}`}
+              >
+                {/* Visual Node */}
+                <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
+                  <div className={`w-1.5 h-1.5 rounded-full transition-all duration-700 relative ${
+                    active 
+                      ? 'bg-accent glow-primary scale-125' 
+                      : 'bg-white/10 scale-75'
+                  }`}>
+                    {active && <div className="absolute inset-0 bg-signal-gradient rounded-full" />}
                   </div>
+                  {isCurrentHead && active && (
+                    <div className="absolute w-4 h-4 rounded-full border border-accent animate-ping opacity-20" />
+                  )}
                 </div>
 
-                <div className="relative flex items-center justify-center order-2 w-0">
-                  <div className={`absolute w-3 h-3 rounded-full ring-4 ring-background z-10 transition-all duration-500 ${getDotClass(event.type, active)}`} />
-                  <div className={`absolute w-12 h-px bg-slate-200 dark:bg-slate-800 transition-all duration-500 ${isLeft ? "-left-12" : "left-0"} ${!active && "opacity-20 translate-x-1"}`} />
-                </div>
+                {/* Event Label Section */}
+                <div className={`flex flex-col ${isLeft ? 'w-1/2 pr-12 items-end text-right' : 'w-1/2 ml-auto pl-12 items-start text-left'}`}>
+                  {/* Timestamp & Hash HUD */}
+                  <div className="flex items-center gap-3 mb-1 opacity-20 group-hover:opacity-100 transition-opacity duration-500">
+                    <span className="forensic-text text-[7px] tracking-widest">{telemetry.hash}</span>
+                    <span className="forensic-text text-[7px] tracking-widest">{new Date(event.timestamp).toLocaleTimeString([], { hour12: false, second: "2-digit" })}</span>
+                  </div>
 
-                <div className="w-1/2 order-3" />
+                  {/* Event Type Name */}
+                  <div className={`font-sans font-extrabold uppercase tracking-widest text-[10px] transition-all duration-300 ${
+                    active ? 'text-text-primary' : 'text-text-dim opacity-40'
+                  } group-hover:text-accent group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]`}>
+                    {event.type.replace(/_/g, " ")}
+                  </div>
+
+                  {/* Reasoning Trace */}
+                  {event.reasoning && active && (
+                    <div className="mt-1 forensic-text italic text-[8px] max-w-[200px] opacity-40 group-hover:opacity-80">
+                      // {event.reasoning}
+                    </div>
+                  )}
+
+                  {/* Payload Data Stream */}
+                  {event.payload && active && (
+                    <div className="mt-4 space-y-1">
+                      {Object.entries(event.payload).map(([k, v]) => {
+                        const delta = calculateDelta(k, v, idx);
+                        if (k === 'id' || k === 'timestamp') return null;
+                        
+                        return (
+                          <div key={k} className={`flex flex-col ${isLeft ? 'items-end' : 'items-start'}`}>
+                            <div className="flex items-baseline gap-2">
+                               <span className="tool-label !text-[7px] opacity-30">{k}</span>
+                               <span className="tool-value !text-[11px] tracking-tighter">
+                                 {typeof v === 'number' ? `₹${v.toLocaleString()}` : String(v)}
+                               </span>
+                            </div>
+                            {delta && (
+                              <div className={`flex items-center gap-1.5 mt-0.5 ${delta.isPositive ? 'text-status-success/80' : 'text-status-error/80'} forensic-text !text-[7px] font-bold`}>
+                                 <span>{delta.text}</span>
+                                 {delta.isAnomaly && (
+                                   <span className="px-1 bg-status-warning/10 text-status-warning rounded-[2px] tracking-[0.2em] uppercase glow-secondary border border-status-warning/20">Sensitive</span>
+                                 )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}

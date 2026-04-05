@@ -29,15 +29,15 @@ export default function PolicyCard({ policy, events }: PolicyCardProps) {
     const list = getDerivedFrom(field);
     if (list.length === 0) return null;
     return (
-      <div className="mt-2 space-y-1.5 border-l border-slate-200 dark:border-slate-700 ml-1 pl-4">
-        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 italic">Audit Traceability</div>
+      <div className="mt-4 space-y-2 border-l border-white/5 ml-1 pl-4">
+        <div className="tool-label !text-[6px] mb-2 font-bold tracking-[0.2em] text-text-dim/60">AUDIT_TRACEABILITY</div>
         {list.map((item, idx) => (
-          <div key={idx} className="flex items-center text-[11px] font-mono group">
-            <span className="text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors mr-2">
+          <div key={idx} className="flex items-center text-[10px] font-mono group/item">
+            <span className="text-text-dim group-hover/item:text-text-secondary transition-colors mr-3 uppercase !text-[8.5px]">
               {item.type}
             </span>
-            <span className="text-blue-600 dark:text-blue-400 font-bold">
-              ({typeof item.val === 'number' ? `$${item.val.toLocaleString()}` : item.val})
+            <span className="text-accent-secondary font-bold tracking-tight">
+              ({typeof item.val === 'number' ? `₹${item.val.toLocaleString()}` : item.val})
             </span>
           </div>
         ))}
@@ -46,58 +46,67 @@ export default function PolicyCard({ policy, events }: PolicyCardProps) {
   };
 
   return (
-    <div className="p-8 transition-colors duration-300">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Policy Master Record</h2>
-        <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tighter">
-          Live System Data
+    <div className="glass-panel p-8 rounded-2xl animate-hud-slide">
+      <div className="mb-12 flex justify-between items-start">
+        <div>
+          <h2 className="tool-title !text-sm flex items-center gap-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent glow-primary animate-signal-pulse" />
+            POLICY_MASTER_RECORD
+          </h2>
+          <div className="forensic-text mt-2 text-text-dim uppercase tracking-[0.3em] !text-[8px] font-bold">REGISTRY_ID: {policy.id}</div>
+        </div>
+        <div className="forensic-text !text-[7.5px] text-accent tracking-[0.5em] pt-1 font-extrabold opacity-80">
+          [ AUTHENTICATED_LIVE_STREAM ]
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <div className="group">
-            <div className="text-[10px] font-bold text-slate-500 uppercase mb-1 tracking-wider">Reference ID</div>
-            <div className="text-sm font-mono text-slate-700 dark:text-white bg-slate-50 dark:bg-slate-900/50 p-2 rounded border border-slate-200 dark:border-slate-800 group-hover:border-blue-500/30 transition-colors">
-              {policy.id}
-            </div>
-          </div>
-          
-          <div className="group">
-            <div className="text-[10px] font-bold text-slate-500 uppercase mb-1 tracking-wider">Policy Holder Name</div>
-            <div className="text-base font-semibold text-slate-800 dark:text-white">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* PRIMARY METADATA */}
+        <div className="lg:col-span-4 space-y-10">
+          <div>
+            <div className="tool-label !text-[7px] opacity-30 mb-3">HOLDER_ENTITY</div>
+            <div className="tool-value !text-2xl text-foreground tracking-tight">
               {policy.name}
             </div>
           </div>
 
-          <div className="group">
-            <div className="text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-wider">Operational Status</div>
-            <div className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border shadow-sm ${
-              policy.status.toLowerCase() === 'active' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' :
-              policy.status.toLowerCase() === 'cancelled' ? 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400' :
-              'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+          <div>
+            <div className="tool-label !text-[7px] opacity-30 mb-4 tracking-[0.2em]">STATE_VECTOR</div>
+            <div className={`tool-value !text-[11px] tracking-[0.4em] uppercase font-black px-4 py-2 glass-panel inline-block rounded-full ${
+              policy.status.toLowerCase() === 'active' ? 'text-status-success glow-primary border-status-success/20' :
+              policy.status.toLowerCase() === 'cancelled' ? 'text-status-error border-status-error/20' :
+              'text-status-warning border-status-warning/20'
             }`}>
               {policy.status}
             </div>
-            {renderDerivedList('status')}
+            <div className="mt-8">
+              {renderDerivedList('status')}
+            </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="group">
-            <div className="text-[10px] font-bold text-slate-500 uppercase mb-1 tracking-wider">Annual Premium (USD)</div>
-            <div className="text-3xl font-mono font-bold text-slate-900 dark:text-white tracking-tighter">
-              ${policy.premium.toLocaleString()}
-            </div>
-            {renderDerivedList('premium')}
-          </div>
+        {/* FINANCIAL LAYER */}
+        <div className="lg:col-span-8 flex flex-col justify-end">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
+             <div className="group transition-all duration-700">
+                <div className="tool-label !text-[7.5px] opacity-30 mb-4 tracking-[0.2em]">ANNUAL_PREMIUM_SIGNAL</div>
+                <div className="tool-value !text-7xl text-accent font-black tracking-tighter transition-all group-hover:text-signal-gradient group-hover:drop-shadow-[0_0_35px_rgba(34,211,238,0.5)]">
+                  ₹{policy.premium.toLocaleString()}
+                </div>
+                <div className="mt-10 border-t border-white/5 pt-6">
+                  {renderDerivedList('premium')}
+                </div>
+             </div>
 
-          <div className="group pt-2 border-t border-slate-200 dark:border-slate-800/50">
-            <div className="text-[10px] font-bold text-slate-500 uppercase mb-1 tracking-wider">Total Coverage Limit</div>
-            <div className="text-xl font-mono font-semibold text-slate-700 dark:text-slate-200">
-              ${policy.coverageLimit.toLocaleString()}
-            </div>
-            {renderDerivedList('coverageLimit')}
+             <div className="group transition-all duration-700">
+                <div className="tool-label !text-[7.5px] opacity-30 mb-4 tracking-[0.2em]">LIMIT_OF_LIABILITY</div>
+                <div className="tool-value !text-4xl text-text-primary/60 font-black tracking-tight transition-all group-hover:text-text-primary">
+                  ₹{policy.coverageLimit.toLocaleString()}
+                </div>
+                <div className="mt-10 border-t border-white/5 pt-6">
+                  {renderDerivedList('coverageLimit')}
+                </div>
+             </div>
           </div>
         </div>
       </div>

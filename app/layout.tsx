@@ -13,12 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Policy Replay Console",
+  title: "Policy Intelligence System",
   description: "Deterministic event-sourced policy simulation and audit engine.",
 };
 
 import { AppProvider } from "./context/AppContext";
 import Navbar from "./components/Navbar";
+import TopHeader from "@/app/components/TopHeader";
 
 export default function RootLayout({
   children,
@@ -30,11 +31,12 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
-      <body className="min-h-full">
+      <body className="antialiased overflow-x-hidden selection:bg-accent selection:text-black">
         <AppProvider>
-          <div className="flex">
+          <div className="relative min-h-screen">
+            <TopHeader />
             <Navbar />
-            <main className="flex-1 min-h-screen">
+            <main className="w-full">
               {children}
             </main>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ReplayEvent } from '@/types/event';
 import { reconstructState } from '@/lib/replayEngine';
 
@@ -18,6 +18,7 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
   const [steps, setSteps] = useState<{ event: ReplayEvent; resultingState: any }[]>([]);
   const [progression, setProgression] = useState<string[]>([]);
   const [isDebugMode, setIsDebugMode] = useState(false);
+  const [expandedField, setExpandedField] = useState<string | null>(null);
 
   const handleReplay = () => {
     if (!targetTime) return;
@@ -38,45 +39,125 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
     return String(reconstructedState[field]) === String(currentPolicy[field]) ? "MATCH" : "MISMATCH";
   };
 
+  const getFieldDerivations = (field: keyof Policy) => {
+    const derivations: { type: string; reasoning: string }[] = [];
+    
+    for (let i = 0; i < steps.length; i++) {
+      const step = steps[i];
+      if (step.event.payload && step.event.payload[field] !== undefined) {
+         let reasoning = step.event.reasoning || "State mutated via payload update";
+         reasoning = reasoning.replace("→ ", "");
+         
+         // Delta Computation
+         let deltaSuffix = "";
+         if (typeof step.event.payload[field] === 'number') {
+            const currentValue = step.event.payload[field];
+            for (let j = i - 1; j >= 0; j--) {
+               const pastEvent = steps[j].event;
+               if (pastEvent.payload && typeof pastEvent.payload[field] === 'number') {
+                  const diff = currentValue - pastEvent.payload[field];
+                  if (diff !== 0) {
+                     deltaSuffix = diff > 0 
+                        ? ` [+ ₹${diff.toLocaleString()}]` 
+                        : ` [- ₹${Math.abs(diff).toLocaleString()}]`;
+                  }
+                  break;
+               }
+            }
+         }
+         
+         derivations.push({ type: step.event.type, reasoning: reasoning + deltaSuffix });
+      } else if (step.event.type === 'POLICY_CREATED') {
+         if (field === 'status' || (step.event.payload && step.event.payload[field] !== undefined)) {
+            derivations.push({ type: step.event.type, reasoning: "Initial system registration" });
+         }
+      }
+    }
+    return derivations;
+  };
+
   const renderFieldValidation = (label: string, field: keyof Policy) => {
     if (!reconstructedState) return null;
     const result = getValidationResult(field);
     const isMatch = result === "MATCH";
+    const isExpanded = expandedField === field;
     
     return (
-      <div className="flex flex-col p-3 bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-lg group hover:border-blue-500/30 transition-colors shadow-sm dark:shadow-none">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</span>
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter ${
-            isMatch ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+      <div className={`flex flex-col py-3 border-b border-border/20 group hover:border-accent/40 transition-all duration-300 ${isExpanded ? 'bg-accent/5 px-3 rounded-sm border-accent/20' : ''}`}>
+        <div 
+          className="flex justify-between items-center mb-2 cursor-pointer"
+          onClick={() => setExpandedField(isExpanded ? null : field)}
+        >
+          <div className="flex items-center gap-2">
+            <span className="tool-label">{label}</span>
+            <svg 
+              viewBox="0 0 24 24" 
+              className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''} fill-muted-foreground`}
+            >
+              <path d="M7 10l5 5 5-5z" />
+            </svg>
+          </div>
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-widest ${
+            isMatch ? 'text-emerald-500 bg-emerald-500/10' : 'text-red-500 bg-red-500/10'
           }`}>
             {result}
           </span>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <div className="text-[9px] text-slate-400 dark:text-slate-500 uppercase font-bold mb-0.5 tracking-tighter">Historical</div>
-            <div className="text-xs font-mono text-slate-600 dark:text-slate-300">
-              {typeof reconstructedState[field] === 'number' ? `$${reconstructedState[field].toLocaleString()}` : String(reconstructedState[field] ?? 'N/A')}
+            <div className="text-[9px] text-muted uppercase tracking-widest mb-1">Historical</div>
+            <div className="text-sm font-mono text-muted-foreground">
+              {typeof reconstructedState[field] === 'number' ? `₹${reconstructedState[field].toLocaleString()}` : String(reconstructedState[field] ?? 'N/A')}
             </div>
           </div>
           <div>
-            <div className="text-[9px] text-slate-400 dark:text-slate-500 uppercase font-bold mb-0.5 tracking-tighter">Current</div>
-            <div className="text-xs font-mono text-slate-800 dark:text-white font-bold">
-              {typeof currentPolicy[field] === 'number' ? `$${currentPolicy[field].toLocaleString()}` : String(currentPolicy[field])}
+            <div className="text-[9px] text-muted uppercase tracking-widest mb-1">Current</div>
+            <div className={`text-sm font-mono ${isMatch ? 'text-foreground' : 'text-red-500'}`}>
+              {typeof currentPolicy[field] === 'number' ? `₹${currentPolicy[field].toLocaleString()}` : String(currentPolicy[field])}
             </div>
           </div>
         </div>
+
+        {/* EXPLAIN STATE LOGIC (Visible when expanded or in Debug) */}
+        {(isExpanded || isDebugMode) && (
+          <div className="mt-4 pt-3 border-t border-border/10 animate-in fade-in slide-in-from-top-2 duration-300">
+             <div className="text-[9px] text-muted uppercase tracking-widest mb-2 font-bold flex justify-between">
+                <span>Forensic Derivation Trace:</span>
+                {isExpanded && <span className="text-accent">DETAILED VIEW</span>}
+             </div>
+             <ul className="space-y-2 pl-0">
+               {getFieldDerivations(field).map((deriv, idx) => (
+                  <li key={idx} className="flex flex-col gap-1 text-[10px] items-start text-muted-foreground font-mono border-l border-border/40 pl-3">
+                    <div className="flex gap-2">
+                      <span className="text-accent flex-shrink-0">{deriv.type}</span>
+                    </div>
+                    <span className="italic text-muted leading-relaxed">→ {deriv.reasoning}</span>
+                  </li>
+               ))}
+               {getFieldDerivations(field).length === 0 && (
+                  <li className="text-[10px] text-muted font-mono italic border-l border-border/40 pl-3">- Inherited from base template</li>
+               )}
+             </ul>
+          </div>
+        )}
       </div>
     );
   };
 
   return (
-    <div className="p-8 transition-colors duration-300">
-      <div className="flex justify-between items-center mb-6 text-foreground">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Replay & Audit Engine</h2>
-        <div className="flex items-center space-x-3">
+    <div className="glass-panel p-6 rounded-2xl animate-hud-slide">
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h2 className="tool-title !text-sm flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            REPLAY_AUDIT_ENGINE
+          </h2>
+          <div className="forensic-text mt-1 opacity-40">SIGNAL_RECONSTRUCTION_LAYER</div>
+        </div>
+        
+        <div className="flex items-center gap-4">
           <label className="flex items-center cursor-pointer group">
+            <span className="mr-3 forensic-text !text-[8px] tracking-[0.2em] text-muted-foreground group-hover:text-accent transition-colors">DEBUG_TRACE</span>
             <div className="relative">
               <input 
                 type="checkbox" 
@@ -84,91 +165,111 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
                 checked={isDebugMode}
                 onChange={(e) => setIsDebugMode(e.target.checked)}
               />
-              <div className={`w-8 h-4 rounded-full transition-colors ${isDebugMode ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-800'}`}></div>
-              <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isDebugMode ? 'translate-x-4' : 'translate-x-0'}`}></div>
+              <div className={`w-7 h-3 rounded-full transition-colors ${isDebugMode ? 'bg-accent/40' : 'bg-white/5 border border-white/5'}`}></div>
+              <div className={`absolute top-0.5 left-0.5 w-2 h-2 rounded-full transition-transform ${isDebugMode ? 'translate-x-4 bg-accent' : 'translate-x-0 bg-white/20'}`}></div>
             </div>
-            <span className="ml-2 text-[10px] font-bold uppercase tracking-tight text-slate-500 group-hover:text-blue-500 dark:group-hover:text-slate-400 transition-colors">Debug Trace</span>
           </label>
         </div>
       </div>
 
-      <div className="space-y-6">
-        {/* SECTION A: REPLAY CONTROL */}
-        <div className="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Target Temporal Offset</label>
-          <div className="flex space-x-3">
+      <div className="space-y-12">
+        {/* TEMPORAL OFFSET INPUT */}
+        <div className="group relative">
+          <label className="tool-label block mb-2 opacity-30 group-hover:opacity-100 transition-opacity">Temporal Offset Selection</label>
+          <div className="flex flex-col gap-6">
             <input 
               type="datetime-local" 
               value={targetTime}
               onChange={(e) => setTargetTime(e.target.value)}
-              className="flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-mono"
+              className="w-full bg-transparent border-b border-white/5 py-2 forensic-text !text-foreground focus:border-accent transition-all cursor-pointer"
             />
-            <button 
-              onClick={handleReplay}
-              disabled={!targetTime}
-              className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 text-white font-bold px-6 py-3 rounded-lg shadow-lg active:scale-[0.98] transition-all uppercase tracking-widest text-[10px]"
-            >
-              Init Replay
-            </button>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <button 
+                onClick={handleReplay}
+                disabled={!targetTime}
+                className={`group relative overflow-hidden h-10 border border-white/5 rounded-full transition-all duration-500 ${
+                  !targetTime ? 'opacity-20 cursor-not-allowed' : 'hover:border-accent/40'
+                }`}
+              >
+                <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <span className="relative forensic-text !text-[9px] tracking-[0.3em] font-bold text-foreground group-hover:text-accent">
+                  [ INIT_REPLAY ]
+                </span>
+              </button>
+
+              <button 
+                onClick={() => {
+                  const data = JSON.stringify(events, null, 2);
+                  const blob = new Blob([data], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `audit-log-${new Date().getTime()}.json`;
+                  a.click();
+                }}
+                className="group relative overflow-hidden h-10 bg-white/[0.02] border border-white/5 hover:border-white/20 rounded-full transition-all duration-500"
+              >
+                <span className="relative forensic-text !text-[8px] tracking-[0.2em] text-muted-foreground group-hover:text-foreground">
+                  EXPORT_SIGNALS
+                </span>
+              </button>
+            </div>
           </div>
         </div>
 
         {reconstructedState && (
-          <>
-            {/* SECTION B: RECONSTRUCTED STATE */}
-            <div className="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
-              <div className="flex items-center space-x-2 mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Lifecycle Path:</span>
-                <div className="flex flex-wrap items-center gap-1">
-                  {progression.map((p, i) => (
-                    <span key={p} className="flex items-center">
-                      <span className="text-[10px] font-mono text-blue-600 dark:text-blue-400 bg-blue-500/5 px-2 py-0.5 rounded border border-blue-500/10">{p}</span>
-                      {i < progression.length - 1 && <span className="mx-1 text-slate-400 dark:text-slate-600 text-[10px]">→</span>}
+          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
+            {/* LIFECYCLE PROGRESSION */}
+            <div className="space-y-3">
+              <div className="tool-label !text-[7px] opacity-30">LIFECYCLE_PATH_RECONSTRUCTED</div>
+              <div className="flex flex-wrap items-center gap-2">
+                {progression.map((p, i) => (
+                  <React.Fragment key={p}>
+                    <span className="forensic-text !text-[9px] text-accent px-2 py-0.5 bg-accent/5 rounded-[4px] border border-accent/10">
+                      {p}
                     </span>
-                  ))}
-                </div>
+                    {i < progression.length - 1 && (
+                      <span className="text-white/10 forensic-text">→</span>
+                    )}
+                  </React.Fragment>
+                ))}
               </div>
-              
-              <div className="grid grid-cols-1 gap-3">
+            </div>
+
+            {/* FIELD VALIDATION OVERLAYS */}
+            <div className="space-y-4">
+              <div className="tool-label !text-[7px] opacity-30">FORENSIC_STATE_STREAMS</div>
+              <div className="grid grid-cols-1 gap-2">
                 {renderFieldValidation("Risk Premium", "premium")}
                 {renderFieldValidation("Liability Cap", "coverageLimit")}
                 {renderFieldValidation("Policy Status", "status")}
               </div>
             </div>
 
-            {/* SECTION C: DEBUG / EXPLANATION PANEL */}
+            {/* DEBUG TRACE STREAM */}
             {isDebugMode && steps.length > 0 && (
-              <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xl dark:shadow-none transition-colors">
-                <div className="p-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
-                  <h3 className="text-[10px] font-bold text-slate-700 dark:text-white uppercase tracking-widest">Replay Explanation Panel</h3>
-                  <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500">{steps.length} signals tracked</span>
+              <div className="space-y-4 pt-6 border-t border-white/5">
+                <div className="flex justify-between items-center">
+                   <div className="tool-label !text-[7px] opacity-30">DETAILED_SIGNAL_SEQUENCE</div>
+                   <span className="forensic-text !text-[8px] opacity-20">{steps.length} SIGNALS</span>
                 </div>
-                <div className="p-3 text-[11px] font-mono leading-relaxed max-h-80 overflow-y-auto space-y-4 custom-scrollbar text-foreground">
+                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-4 custom-scrollbar">
                   {steps.map((step, idx) => (
-                    <div key={idx} className="border-l-2 border-slate-200 dark:border-slate-700 pl-4 py-1 group hover:border-blue-500 transition-colors">
-                      <div className="text-blue-600 dark:text-blue-400 font-bold mb-1 flex items-center">
-                        <span className="bg-blue-400/10 px-1.5 py-0.5 rounded mr-2 text-[9px]">S-0{idx + 1}</span>
-                        {step.event.type}
+                    <div key={idx} className="group relative pl-4 border-l border-white/5 hover:border-accent/40 transition-colors py-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="forensic-text !text-[8px] text-accent font-bold">S-{String(idx + 1).padStart(2, '0')}</span>
+                        <span className="forensic-text !text-[9px] text-foreground/80">{step.event.type}</span>
                       </div>
-                      <div className="text-slate-400 dark:text-slate-500 text-[10px] mb-2 font-light">
-                        Temporal Index: {new Date(step.event.timestamp).toLocaleString()}
-                      </div>
-                      <div className="space-y-1 mt-2">
-                        <div className="text-slate-500 dark:text-slate-400 flex">
-                          <span className="w-16 flex-shrink-0">Payload:</span>
-                          <span className="text-amber-600 dark:text-amber-500/80">{JSON.stringify(step.event.payload)}</span>
-                        </div>
-                        <div className="text-slate-500 dark:text-slate-400 flex">
-                          <span className="w-16 flex-shrink-0">State:</span>
-                          <span className="text-emerald-600 dark:text-emerald-500/80">{JSON.stringify(step.resultingState)}</span>
-                        </div>
+                      <div className="forensic-text opacity-20 group-hover:opacity-40 transition-opacity">
+                        {new Date(step.event.timestamp).toLocaleString([], { hour12: false })}
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>

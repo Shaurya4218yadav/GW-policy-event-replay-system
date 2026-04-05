@@ -5,4 +5,5 @@ export interface ReplayEvent {
   type: EventType;
   payload?: any;
   timestamp: string;
+  reasoning?: string;
 }

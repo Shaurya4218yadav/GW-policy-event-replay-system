@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Policy } from '@/types/policy';
+import { useAppContext } from '../context/AppContext';
 
 interface UpdateFormProps {
   policy: Policy;
@@ -9,6 +10,7 @@ interface UpdateFormProps {
 }
 
 export default function UpdateForm({ policy, onUpdate }: UpdateFormProps) {
+  const { events } = useAppContext();
   const [formData, setFormData] = useState<Policy>(policy);
 
   // Sync state if policy prop changes externally
@@ -47,34 +49,56 @@ export default function UpdateForm({ policy, onUpdate }: UpdateFormProps) {
     onUpdate(finalPolicy);
   };
 
+  const checkConflict = (field: keyof Policy) => {
+    if (events.length === 0) return false;
+    
+    // Find last matching event payload
+    for (let i = events.length - 1; i >= 0; i--) {
+      const e = events[i];
+      if (e.payload && e.payload[field] !== undefined) {
+         const eventValue = e.payload[field];
+         const inputValue = formData[field];
+         
+         if (typeof eventValue === 'number') {
+            return Number(eventValue) !== Number(inputValue);
+         }
+         return String(eventValue) !== String(inputValue);
+      }
+    }
+    return false;
+  };
+
   return (
-    <div className="p-8 transition-colors duration-300">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Transaction Registry</h2>
-        <div className="text-[10px] italic text-slate-400 dark:text-slate-500">Submit to generate new audit signals</div>
+    <div className="glass-panel p-6 rounded-2xl animate-hud-slide">
+      <div className="mb-8 overflow-hidden">
+        <h2 className="tool-title !text-sm flex items-center gap-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent glow-primary animate-signal-pulse" />
+          TRANSACTION_REGISTRY
+        </h2>
+        <div className="forensic-text mt-2 text-text-dim uppercase tracking-[0.3em] font-bold !text-[8px]">GENERATE_NEW_AUDIT_SIGNALS</div>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Policy Description</label>
+      <form onSubmit={handleSubmit} className="space-y-10">
+        <div className="space-y-8">
+          <div className="group relative">
+            <label className="tool-label block mb-1">Policy Description</label>
             <input 
               type="text" 
               name="name" 
               value={formData.name} 
               onChange={handleChange}
-              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700"
-              placeholder="e.g. Standard Auto"
+              className="w-full bg-transparent border-b border-white/5 py-2 text-sm forensic-text !text-text-primary focus:border-accent transition-all placeholder:text-text-dim/20"
+              placeholder="_EMPTY_STRING"
             />
           </div>
           
-          <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Operational State</label>
+          <div className="group relative">
+            <label className="tool-label block mb-1">Operational State</label>
             <select 
               name="status" 
               value={formData.status} 
               onChange={handleChange}
-              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none"
+              className="w-full bg-transparent border-b border-white/5 py-2 text-sm forensic-text !text-text-primary focus:border-accent transition-all appearance-none cursor-pointer"
             >
               <option value="Draft">Draft</option>
               <option value="Active">Active</option>
@@ -86,31 +110,41 @@ export default function UpdateForm({ policy, onUpdate }: UpdateFormProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Target Premium (USD)</label>
-            <div className="relative">
-              <span className="absolute left-3 top-3.5 text-slate-400 dark:text-slate-500 text-xs">$</span>
+        <div className="space-y-8">
+          <div className="group relative">
+            <label className="tool-label flex justify-between items-center w-full mb-1">
+              Target Premium
+              {checkConflict('premium') && (
+                <span className="text-[7.5px] font-black text-status-warning animate-pulse tracking-[0.3em] glow-secondary border border-status-warning/20 px-2 rounded-full">[ CONFLICT ]</span>
+              )}
+            </label>
+            <div className="relative flex items-center">
+              <span className="tool-value !text-xs opacity-20 mr-2">₹</span>
               <input 
                 type="number" 
                 name="premium" 
                 value={formData.premium} 
                 onChange={handleChange}
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 pl-7 text-sm text-slate-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                className={`w-full bg-transparent border-b border-white/5 py-2 tool-value !text-sm focus:border-accent transition-all ${checkConflict('premium') ? 'text-status-warning' : ''}`}
               />
             </div>
           </div>
           
-          <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Limit of Liability (USD)</label>
-            <div className="relative">
-              <span className="absolute left-3 top-3.5 text-slate-400 dark:text-slate-500 text-xs">$</span>
+          <div className="group relative">
+            <label className="tool-label flex justify-between items-center w-full mb-1">
+              Limit of Liability
+              {checkConflict('coverageLimit') && (
+                <span className="text-[7.5px] font-black text-status-warning animate-pulse tracking-[0.3em] glow-secondary border border-status-warning/20 px-2 rounded-full">[ CONFLICT ]</span>
+              )}
+            </label>
+            <div className="relative flex items-center">
+              <span className="tool-value !text-xs opacity-20 mr-2">₹</span>
               <input 
                 type="number" 
                 name="coverageLimit" 
                 value={formData.coverageLimit} 
                 onChange={handleChange}
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 pl-7 text-sm text-slate-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                className={`w-full bg-transparent border-b border-white/5 py-2 tool-value !text-sm focus:border-accent transition-all ${checkConflict('coverageLimit') ? 'text-status-warning' : ''}`}
               />
             </div>
           </div>
@@ -118,9 +152,12 @@ export default function UpdateForm({ policy, onUpdate }: UpdateFormProps) {
 
         <button 
           type="submit" 
-          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg shadow-blue-900/40 transform transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500/30 uppercase tracking-widest text-xs mt-2"
+          className="w-full group relative overflow-hidden h-12 border border-accent/20 hover:border-accent transition-all duration-700 rounded-full"
         >
-          Execute Field Update
+          <div className="absolute inset-0 bg-signal-gradient opacity-0 group-hover:opacity-10 transition-opacity" />
+          <span className="relative forensic-text !text-[9.5px] tracking-[0.4em] font-black text-text-primary group-hover:text-accent transition-all group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
+            [ EXECUTE_FIELD_UPDATE ]
+          </span>
         </button>
       </form>
     </div>

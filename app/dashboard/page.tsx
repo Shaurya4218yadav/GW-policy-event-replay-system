@@ -5,99 +5,101 @@ import { useAppContext } from "../context/AppContext";
 import PolicyCard from "../components/PolicyCard";
 
 export default function DashboardPage() {
-  const { policy, events, role, systemTime } = useAppContext();
+  const { policy, events } = useAppContext();
 
-  const recentEvents = [...events].reverse().slice(0, 5);
-  const totalEvents = events.length;
+  const recentEvents = [...events].reverse().slice(0, 8);
 
   return (
-    <div className="p-8 pl-10 md:pl-[88px] min-h-screen max-w-[1400px] mx-auto">
-      {/* Header section with system status */}
-      <header className="mb-10 flex flex-col md:flex-row md:justify-between md:items-end gap-4 border-b border-border pb-6 mt-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground mb-1">System Overview</h1>
-          <div className="flex items-center gap-3">
-            <span className="text-muted-foreground font-mono text-xs">
-              Role: {role || 'unknown'}
-            </span>
-            <span className="text-border">|</span>
-            <span className="text-muted-foreground font-mono text-xs flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              Status: Active
-            </span>
-          </div>
+    <div className="relative min-h-screen bg-background text-foreground transition-all duration-700 overflow-hidden pt-24 px-12 selection:bg-accent selection:text-black">
+      {/* HEADER HUD */}
+      <div className="mb-12 relative z-10">
+        <h1 className="tool-title !text-2xl tracking-tighter uppercase flex items-center gap-4">
+           <span className="w-1.5 h-6 bg-signal-gradient rounded-full glow-primary" />
+           <span className="text-signal-gradient">SYSTEM_INTELLIGENCE_DASHBOARD</span>
+        </h1>
+        <div className="flex items-center gap-4 forensic-text uppercase tracking-[0.3em] font-black !text-[9.5px] pl-6 mt-2">
+           <span className="text-accent underline decoration-accent/20 underline-offset-8">LIVE_HEARTBEAT</span>
+           <span className="w-1.5 h-px bg-white/10" />
+           <span className="text-status-success font-bold">ENGINE_STATUS: OPTIMAL</span>
+           <span className="w-1.5 h-px bg-white/10" />
+           <span className="text-text-secondary">SIGNAL_COUNT: {events.length}</span>
         </div>
-        
-        <div className="text-right">
-          <div className="text-muted-foreground font-mono text-xs flex flex-col gap-1">
-            <span>SYS_TIME: {systemTime}</span>
-            <span>EVENTS_TOTAL: {totalEvents}</span>
-          </div>
-        </div>
-      </header>
+      </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 xl:gap-12 content-start">
-        {/* Main Stats */}
-        <div className="xl:col-span-3 space-y-10">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[10px] font-mono text-muted uppercase tracking-widest">Active Policy State</span>
-              <div className="flex-1 border-b border-border border-dashed"></div>
-            </div>
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 relative z-10">
+        {/* CENTRAL FOCUS: POLICY MASTER */}
+        <div className="xl:col-span-9 space-y-12">
+          <div className="relative group">
+            <div className="absolute -inset-8 bg-accent/5 blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 -z-10" />
             <PolicyCard policy={policy} events={events} />
           </div>
 
-          <div>
-             <div className="flex items-center gap-2 mb-4">
-              <span className="text-[10px] font-mono text-muted uppercase tracking-widest">System Metrics</span>
-              <div className="flex-1 border-b border-border border-dashed"></div>
+          {/* SYSTEM METRICS HUD */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="glass-panel p-6 rounded-2xl border-white/5 group hover:border-status-success/20 transition-all duration-500">
+              <div className="tool-label !text-[7px] opacity-30 mb-2">SYSTEM_HEALTH</div>
+              <div className="tool-value !text-[11px] text-status-success tracking-[0.3em] font-black">CONNECTED</div>
             </div>
-            <div className="grid grid-cols-3 gap-1">
-              <div className="p-5 border-l-2 border-border bg-background hover:bg-muted/5 transition-colors">
-                <div className="text-[10px] font-mono text-muted uppercase mb-1">Health</div>
-                <div className="text-lg font-mono text-emerald-500/80">OPTIMAL</div>
-              </div>
-              <div className="p-5 border-l-2 border-border bg-background hover:bg-muted/5 transition-colors">
-                <div className="text-[10px] font-mono text-muted uppercase mb-1">Sync Offset</div>
-                <div className="text-lg font-mono text-foreground">0.05ms</div>
-              </div>
-              <div className="p-5 border-l-2 border-border bg-background hover:bg-muted/5 transition-colors">
-                <div className="text-[10px] font-mono text-muted uppercase mb-1">Uptime</div>
-                <div className="text-lg font-mono text-foreground">99.99%</div>
-              </div>
+            <div className="glass-panel p-6 rounded-2xl border-white/5 group hover:border-accent/20 transition-all duration-500">
+              <div className="tool-label !text-[7px] opacity-30 mb-2">LATENCY_OFFSET</div>
+              <div className="tool-value !text-[11px] text-text-primary tracking-[0.3em] font-black">{events.length > 0 ? '0.002MS' : '---'}</div>
+            </div>
+            <div className="glass-panel p-6 rounded-2xl border-white/5 group hover:border-accent/20 transition-all duration-500">
+              <div className="tool-label !text-[7px] opacity-30 mb-2">UPTIME_VECTOR</div>
+              <div className="tool-value !text-[11px] text-text-primary tracking-[0.3em] font-black">99.999%</div>
+            </div>
+            <div className="glass-panel p-6 rounded-2xl border-white/5 group hover:border-accent/20 transition-all duration-500">
+              <div className="tool-label !text-[7px] opacity-30 mb-2">ENTROPY_INDEX</div>
+              <div className="tool-value !text-[11px] text-accent tracking-[0.3em] font-black glow-primary">LOW</div>
             </div>
           </div>
         </div>
 
-        {/* Recent Stream */}
-        <aside className="space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-[10px] font-mono text-muted uppercase tracking-widest">Recent Signals</h2>
-          </div>
-          
-          <div className="flex flex-col gap-px bg-border p-px">
-            {recentEvents.map((event) => (
-              <div key={event.id} className="p-3 bg-background hover:bg-muted/5 transition-colors flex flex-col gap-1.5">
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="font-mono text-muted-foreground">
-                    {new Date(event.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second:'2-digit' })}
-                  </span>
-                  <span className="font-mono text-accent-muted bg-accent/10 px-1 rounded-sm">
-                    {event.type.split('_')[0]}
-                  </span>
+        {/* SIDE HUD: SIGNAL STREAM */}
+        <div className="xl:col-span-3">
+          <div className="glass-panel p-6 rounded-2xl h-full border-white/5">
+             <div className="mb-10 flex justify-between items-center">
+                <h3 className="tool-label !text-[8.5px] font-black text-text-dim/60 tracking-[0.2em]">RECENT_SIGNALS</h3>
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse glow-primary" />
+             </div>
+            
+            <div className="space-y-4">
+              {recentEvents.map((event, idx) => (
+                <div key={event.id} className="group relative pl-4 border-l border-white/5 hover:border-cyan-400/40 transition-colors py-1">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="forensic-text !text-[8px] text-cyan-400 font-black opacity-60 group-hover:opacity-100 transition-opacity">S-{String(idx + 1).padStart(2, '0')}</span>
+                    <span className="forensic-text !text-[7.5px] text-text-dim/40 group-hover:text-text-dim transition-colors">{new Date(event.timestamp).toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' })}</span>
+                  </div>
+                  <div className="forensic-text !text-[10px] text-text-primary/70 truncate uppercase tracking-[0.2em] font-bold group-hover:text-accent transition-colors">
+                    {event.type.replace('POLICY_', '')}
+                  </div>
                 </div>
-                <div className="text-[11px] font-mono text-foreground truncate pl-2 border-l-2 border-border">
-                  {event.type}
+              ))}
+              
+              {recentEvents.length === 0 && (
+                <div className="forensic-text !text-[9px] opacity-20 italic py-8 text-center">
+                  NO_SIGNALS_DETECTED
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
 
-          <button className="w-full mt-2 py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground border border-border hover:bg-muted/5 transition-colors">
-            [ View Full Log ]
-          </button>
-        </aside>
+            <button className="w-full mt-10 group relative overflow-hidden h-10 border border-white/5 rounded-full transition-all duration-700 hover:border-accent/40">
+              <div className="absolute inset-0 bg-signal-gradient opacity-0 group-hover:opacity-10 transition-opacity" />
+              <span className="relative forensic-text !text-[9px] tracking-[0.3em] font-black text-text-dim group-hover:text-accent transition-all group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
+                VIEW_ALL_LOGS
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* BACKGROUND DECORATIONS */}
+      <div className="fixed top-1/4 -left-20 w-80 h-80 bg-accent/5 blur-[150px] rounded-full -z-10 animate-pulse" />
+      <div className="fixed bottom-1/4 -right-20 w-[400px] h-[400px] bg-accent-secondary/5 blur-[200px] rounded-full -z-10" />
+      
+      {/* GRID TRACES */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02] -z-10" 
+           style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
     </div>
   );
 }
