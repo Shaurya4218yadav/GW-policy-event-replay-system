@@ -18,15 +18,33 @@ export default function UpdateForm({ policy, onUpdate }: UpdateFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'premium' || name === 'coverageLimit' ? Number(value) : value
-    }));
+    
+    if (name === 'premium' || name === 'coverageLimit') {
+      if (value === '') return;
+      
+      const numericValue = Number(value);
+      if (isNaN(numericValue)) return;
+      
+      setFormData(prev => ({
+        ...prev,
+        [name]: numericValue
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdate(formData);
+    
+    const finalPolicy = { ...formData };
+    finalPolicy.premium = Number(finalPolicy.premium);
+    finalPolicy.coverageLimit = Number(finalPolicy.coverageLimit);
+    
+    onUpdate(finalPolicy);
   };
 
   return (

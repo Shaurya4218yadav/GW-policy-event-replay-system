@@ -16,20 +16,9 @@ export default function EventTimeline({ events }: EventTimelineProps) {
             <div key={event.id} className="relative pl-6">
               {/* Timeline dot */}
               <div className="absolute w-3 h-3 bg-blue-500 rounded-full -left-[7px] top-1.5" />
-              
-              <div className="bg-white border border-gray-200 rounded p-3 shadow-sm text-black">
-                <div className="text-sm font-semibold mb-1 text-gray-800">Field Updated: {event.field}</div>
-                <div className="text-sm text-gray-600 mb-2">
-                  <span className="line-through text-red-500 mr-2">
-                    {String(event.oldValue)}
-                  </span> 
-                  <span className="text-green-600">
-                    {String(event.newValue)}
-                  </span>
-                </div>
-                <div className="text-xs text-gray-400">
-                  {new Date(event.timestamp).toLocaleString()}
-                </div>
+              <div className="bg-white border border-gray-200 rounded p-3 shadow-sm text-black font-mono">
+                <div>[{new Date(event.timestamp).toLocaleTimeString()}]</div>
+                <div>{event.field}: {String(event.oldValue)} → {String(event.newValue)}</div>
               </div>
             </div>
           ))}

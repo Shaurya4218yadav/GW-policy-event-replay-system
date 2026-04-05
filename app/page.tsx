@@ -20,18 +20,25 @@ export default function Home() {
   const [events, setEvents] = useState<ReplayEvent[]>([]);
 
   const handleUpdatePolicy = (newPolicy: Policy) => {
+    // Strongly enforce numeric casting at the root handler level
+    const parsedPolicy = {
+      ...newPolicy,
+      premium: Number(newPolicy.premium),
+      coverageLimit: Number(newPolicy.coverageLimit)
+    };
+
     const newEvents: ReplayEvent[] = [];
     const now = new Date().toISOString();
     
     // Compare each field and log an event if changed
-    Object.keys(newPolicy).forEach((key) => {
+    Object.keys(parsedPolicy).forEach((key) => {
       const field = key as keyof Policy;
-      if (policy[field] !== newPolicy[field]) {
+      if (policy[field] !== parsedPolicy[field]) {
         newEvents.push({
           id: crypto.randomUUID(),
           field,
           oldValue: policy[field],
-          newValue: newPolicy[field],
+          newValue: parsedPolicy[field],
           timestamp: now
         });
       }
@@ -39,7 +46,7 @@ export default function Home() {
 
     if (newEvents.length > 0) {
       setEvents(prev => [...prev, ...newEvents]);
-      setPolicy(newPolicy);
+      setPolicy(parsedPolicy);
     }
   };
 
@@ -55,14 +62,12 @@ export default function Home() {
         <div className="border-b border-gray-200">
           <PolicyCard policy={policy} />
         </div>
-        <div className="flex-1">
+        <div className="border-b border-gray-200">
           <UpdateForm policy={policy} onUpdate={handleUpdatePolicy} />
         </div>
-      </div>
-      
-      {/* Replay View (Hidden/Absolute positioned later) */}
-      <div className="hidden">
-        <ReplayView />
+        <div className="flex-1">
+          <ReplayView events={events} currentPolicy={policy} />
+        </div>
       </div>
     </div>
   );
