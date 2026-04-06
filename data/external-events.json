@@ -1,0 +1,9 @@
+{
+  "events": [],
+  "stats": {
+    "totalEvents": 0,
+    "eventsByType": {},
+    "eventsByEntity": {},
+    "lastEventTimestamp": null
+  }
+}

@@ -130,7 +130,7 @@ export default function SimulationPage() {
   return (
     <div className="relative min-h-screen bg-bg-base text-text-primary transition-all duration-700 overflow-x-hidden selection:bg-accent selection:text-black">
       {/* HUD HEADER - FLOATING METADATA */}
-      <div className={`fixed top-16 left-12 z-50 transition-all duration-1000 ${isFocusMode ? 'opacity-20 blur-sm' : 'opacity-100'}`}>
+      <div className={`fixed top-16 left-12 z-30 transition-all duration-1000 ${isFocusMode ? 'opacity-20 blur-sm' : 'opacity-100'}`}>
         <div className="flex flex-col gap-0.5">
           <h1 className="tool-title !text-lg tracking-tighter uppercase flex items-center gap-3">
              <span className="w-1 h-3 bg-signal-gradient rounded-full glow-primary" />
@@ -146,7 +146,7 @@ export default function SimulationPage() {
         </div>
       </div>
 
-      <div className="fixed top-16 right-12 z-50 transition-all duration-1000">
+      <div className="fixed top-16 right-12 z-30 transition-all duration-1000">
         <button 
           onClick={() => setIsFocusMode(!isFocusMode)}
           className={`group flex items-center gap-4 px-5 py-2 glass-panel rounded-full transition-all duration-700 ${

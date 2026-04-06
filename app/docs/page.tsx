@@ -6,7 +6,7 @@ export default function DocsPage() {
   return (
     <div className="relative min-h-screen bg-bg-base text-text-primary transition-all duration-700 overflow-x-hidden selection:bg-accent selection:text-black">
       {/* HUD HEADER */}
-      <div className="fixed top-16 left-12 z-50">
+      <div className="fixed top-16 left-12 z-30">
         <div className="flex flex-col gap-0.5">
           <h1 className="tool-title !text-lg tracking-tighter uppercase flex items-center gap-3">
             <span className="w-1 h-3 bg-signal-gradient rounded-full glow-primary" />

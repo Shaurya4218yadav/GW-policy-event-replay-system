@@ -63,13 +63,17 @@ body {
 .glass-panel {
   background: var(--glass);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transform: translateZ(0);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-panel:hover {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
 /* Signal Gradient Utility */
@@ -99,6 +103,8 @@ body {
   letter-spacing: -0.04em; 
   font-size: 1.5rem;
   color: var(--text-primary);
+  overflow-wrap: anywhere;
+  word-break: keep-all; 
 }
 
 .tool-label { 
@@ -115,6 +121,7 @@ body {
   font-weight: 500; 
   font-size: 1.25rem;
   color: var(--accent-primary);
+  overflow-wrap: anywhere;
 }
 
 .forensic-text {
@@ -122,6 +129,7 @@ body {
   font-size: 0.75rem;
   line-height: 1.6;
   color: var(--text-secondary);
+  overflow-wrap: anywhere;
 }
 
 /* Interactive States */

@@ -1,0 +1,22 @@
+{
+  "policy": {
+    "id": "POL-001",
+    "name": "Standard Auto",
+    "premium": 0,
+    "coverageLimit": 50000,
+    "status": "Draft"
+  },
+  "events": [
+    {
+      "id": "init-event-001",
+      "type": "POLICY_CREATED",
+      "payload": {
+        "name": "Standard Auto",
+        "premium": 0,
+        "coverageLimit": 50000,
+        "status": "Draft"
+      },
+      "timestamp": "2026-04-06T04:42:03.837Z"
+    }
+  ]
+}

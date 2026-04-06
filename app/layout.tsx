@@ -36,7 +36,7 @@ export default function RootLayout({
           <div className="relative min-h-screen">
             <TopHeader />
             <Navbar />
-            <main className="w-full">
+            <main className="w-full pl-12 md:pl-16 pr-4 md:pr-0 overflow-x-hidden max-w-[100vw]">
               {children}
             </main>
           </div>
