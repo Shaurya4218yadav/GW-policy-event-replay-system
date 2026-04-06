@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+
 import { Policy } from "@/types/policy";
 import { ReplayEvent } from "@/types/event";
 
@@ -47,7 +49,9 @@ const initialEvent: ReplayEvent = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [role, setRole] = useState<UserRole>(null);
+
   const [policy, setPolicy] = useState<Policy>(initialPolicy);
   const [events, setEvents] = useState<ReplayEvent[]>([initialEvent]);
   const [theme, setTheme] = useState<Theme>("dark");
@@ -129,7 +133,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setRole(null);
+    router.push("/login");
   };
+
 
   return (
     <AppContext.Provider

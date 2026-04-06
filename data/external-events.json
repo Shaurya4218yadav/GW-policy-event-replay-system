@@ -1,9 +1,337 @@
 {
-  "events": [],
+  "events": [
+    {
+      "entity": "Policy",
+      "eventType": "UPDATE",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "premium": {
+          "oldValue": 1200,
+          "newValue": 1500
+        },
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:52.522Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454532522-0p7ou2urw"
+    },
+    {
+      "entity": "Claim",
+      "eventType": "REPORT",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "CLM-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "status": {
+          "oldValue": null,
+          "newValue": "Open"
+        },
+        "amount": {
+          "oldValue": null,
+          "newValue": 5300
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:53.509Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454533509-6jgcnv8gc"
+    },
+    {
+      "entity": "Policy",
+      "eventType": "UPDATE",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "premium": {
+          "oldValue": 1200,
+          "newValue": 1500
+        },
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:54.514Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454534514-tmr3hw8fp"
+    },
+    {
+      "entity": "Policy",
+      "eventType": "UPDATE",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "premium": {
+          "oldValue": 1200,
+          "newValue": 1500
+        },
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:54.980Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454534980-dgw6pm5t8"
+    },
+    {
+      "entity": "Policy",
+      "eventType": "UPDATE",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "premium": {
+          "oldValue": 1200,
+          "newValue": 1500
+        },
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:55.197Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454535197-qvnb2rw7h"
+    },
+    {
+      "entity": "Claim",
+      "eventType": "REPORT",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "CLM-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "status": {
+          "oldValue": null,
+          "newValue": "Open"
+        },
+        "amount": {
+          "oldValue": null,
+          "newValue": 5300
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:55.228Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454535229-2wf584bkp"
+    },
+    {
+      "entity": "Policy",
+      "eventType": "UPDATE",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "premium": {
+          "oldValue": 1200,
+          "newValue": 1500
+        },
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:55.396Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454535396-q7lghtoe8"
+    },
+    {
+      "entity": "Policy",
+      "eventType": "UPDATE",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "premium": {
+          "oldValue": 1200,
+          "newValue": 1500
+        },
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:55.582Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454535582-tbyp8bjwn"
+    },
+    {
+      "entity": "Claim",
+      "eventType": "REPORT",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "CLM-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "status": {
+          "oldValue": null,
+          "newValue": "Open"
+        },
+        "amount": {
+          "oldValue": null,
+          "newValue": 5300
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:55.692Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454535692-nyvemvmap"
+    },
+    {
+      "entity": "Claim",
+      "eventType": "REPORT",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "CLM-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "status": {
+          "oldValue": null,
+          "newValue": "Open"
+        },
+        "amount": {
+          "oldValue": null,
+          "newValue": 5300
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:55.915Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454535915-n76v71fb0"
+    },
+    {
+      "entity": "Policy",
+      "eventType": "ENDORSE",
+      "timestamp": "2026-04-06T05:48:55.933Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:55.941Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454535941-4f9iexxmy"
+    },
+    {
+      "entity": "Claim",
+      "eventType": "REPORT",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "CLM-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "status": {
+          "oldValue": null,
+          "newValue": "Open"
+        },
+        "amount": {
+          "oldValue": null,
+          "newValue": 5300
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:56.108Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454536108-mtvadazwy"
+    },
+    {
+      "entity": "Claim",
+      "eventType": "REPORT",
+      "timestamp": "2026-04-06T05:48:51.134Z",
+      "entityId": "CLM-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "status": {
+          "oldValue": null,
+          "newValue": "Open"
+        },
+        "amount": {
+          "oldValue": null,
+          "newValue": 5300
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:56.295Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454536295-ie54blbuu"
+    },
+    {
+      "entity": "Policy",
+      "eventType": "ENDORSE",
+      "timestamp": "2026-04-06T05:48:56.396Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:56.404Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454536404-i72rgy6rw"
+    },
+    {
+      "entity": "Policy",
+      "eventType": "ENDORSE",
+      "timestamp": "2026-04-06T05:48:56.620Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:56.630Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454536630-etxj59i55"
+    },
+    {
+      "entity": "Policy",
+      "eventType": "ENDORSE",
+      "timestamp": "2026-04-06T05:48:56.813Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:56.823Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454536823-m6u6krlrq"
+    },
+    {
+      "entity": "Policy",
+      "eventType": "ENDORSE",
+      "timestamp": "2026-04-06T05:48:56.999Z",
+      "entityId": "POL-999",
+      "userId": "guidewire-demo",
+      "changes": {
+        "coverageLimit": {
+          "oldValue": 50000,
+          "newValue": 75000
+        }
+      },
+      "receivedAt": "2026-04-06T05:48:57.008Z",
+      "source": "guidewire-external",
+      "id": "ext-1775454537008-swgapccbo"
+    }
+  ],
   "stats": {
-    "totalEvents": 0,
-    "eventsByType": {},
-    "eventsByEntity": {},
-    "lastEventTimestamp": null
+    "totalEvents": 17,
+    "eventsByType": {
+      "UPDATE": 6,
+      "REPORT": 6,
+      "ENDORSE": 5
+    },
+    "eventsByEntity": {
+      "Policy": 11,
+      "Claim": 6
+    },
+    "lastEventTimestamp": "2026-04-06T05:48:57.008Z"
   }
 }
