@@ -6,6 +6,7 @@ import EventTimeline from "../components/EventTimeline";
 import SimulationPanel from "../components/SimulationPanel";
 import ReplayView from "../components/ReplayView";
 import { ReplayEvent } from "@/types/event";
+import { Policy } from "@/types/policy";
 
 interface Scenario {
   id: string;
@@ -189,6 +190,35 @@ export default function DemoPage() {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [totalSteps, setTotalSteps] = useState<number>(0);
 
+  const currentPolicy: Policy = selectedScenario
+    ? {
+        id: selectedScenario.id,
+        name: selectedScenario.title,
+        premium: events.length > 0 ? Number(events[events.length - 1].payload?.premium ?? selectedScenario.events[0]?.payload?.premium ?? 0) : Number(selectedScenario.events[0]?.payload?.premium ?? 0),
+        coverageLimit: events.length > 0 ? Number(events[events.length - 1].payload?.coverageLimit ?? selectedScenario.events[0]?.payload?.coverageLimit ?? 0) : Number(selectedScenario.events[0]?.payload?.coverageLimit ?? 0),
+        status: (() => {
+          const latest = events.length > 0 ? events[events.length - 1] : selectedScenario.events[selectedScenario.events.length - 1];
+          if (!latest) return 'Draft';
+          if (latest.type === 'POLICY_CANCELLED') return 'Cancelled';
+          if (latest.type === 'POLICY_BOUND') return 'Active';
+          if (latest.type === 'CLAIM_APPROVED') return 'Claim Approved';
+          return 'Active';
+        })(),
+      }
+    : {
+        id: 'default',
+        name: 'Demo Policy',
+        premium: 0,
+        coverageLimit: 0,
+        status: 'Draft',
+      };
+
+  const handleSimulateScenario = (generatedEvents: ReplayEvent[]) => {
+    setEvents(generatedEvents);
+    setActiveTimestamp(null);
+    setSelectedScenario(null);
+  };
+
   const handleRunScenario = async (scenario: Scenario) => {
     setSelectedScenario(scenario);
     setEvents([]); // Clear previous events
@@ -298,24 +328,19 @@ export default function DemoPage() {
                 <EventTimeline
                   events={events}
                   activeTimestamp={activeTimestamp}
-                  setActiveTimestamp={setActiveTimestamp}
                   isFocusMode={isFocusMode}
-                  setIsFocusMode={setIsFocusMode}
                 />
               </div>
               <div className="space-y-6">
                 <SimulationPanel
-                  isExecuting={isExecuting}
-                  executionLogs={executionLogs}
-                  executionPhase={executionPhase}
-                  currentStep={currentStep}
-                  totalSteps={totalSteps}
+                  onSimulate={handleSimulateScenario}
+                  currentPremium={currentPolicy.premium}
+                  currentCoverage={currentPolicy.coverageLimit}
                 />
                 <ReplayView
                   events={events}
-                  activeTimestamp={activeTimestamp}
-                  setActiveTimestamp={setActiveTimestamp}
-                  isFocusMode={isFocusMode}
+                  currentPolicy={currentPolicy}
+                  onTimeSelect={(timestamp) => setActiveTimestamp(timestamp)}
                 />
               </div>
             </div>

@@ -1,23 +1,50 @@
 import { NextResponse } from "next/server";
+import { externalStore, saveExternalStore, resetExternalStore } from "@/lib/externalStore";
 
-// In-memory storage for external events (simulating external system)
-let externalEvents: Array<{
-  id: string;
-  entity: string;
-  eventType: string;
-  timestamp: string;
-  receivedAt: string;
-  source: string;
-  payload?: Record<string, unknown>;
-}> = [];
-let eventStats = {
-  totalEvents: 0,
-  eventsByType: {} as Record<string, number>,
-  eventsByEntity: {} as Record<string, number>,
-  lastEventTimestamp: null as string | null,
-};
+const API_KEY = process.env.GW_EXTERNAL_EVENTS_API_KEY ?? "dev-guidewire-key";
+
+function getRequestApiKey(req: Request) {
+  return (
+    req.headers.get("x-api-key") ||
+    (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "") ||
+    null
+  );
+}
+
+function requireApiKey(req: Request) {
+  const providedKey = getRequestApiKey(req);
+  if (!providedKey || providedKey !== API_KEY) {
+    return NextResponse.json(
+      { error: "Unauthorized: invalid or missing API key" },
+      { status: 401 }
+    );
+  }
+  return null;
+}
+
+function buildEventStats(events: Array<Record<string, any>>) {
+  const stats = {
+    totalEvents: events.length,
+    eventsByType: {} as Record<string, number>,
+    eventsByEntity: {} as Record<string, number>,
+    lastEventTimestamp: null as string | null,
+  };
+
+  events.forEach((event) => {
+    const eventType = event.eventType as string;
+    const entity = event.entity as string;
+    stats.eventsByType[eventType] = (stats.eventsByType[eventType] || 0) + 1;
+    stats.eventsByEntity[entity] = (stats.eventsByEntity[entity] || 0) + 1;
+    stats.lastEventTimestamp = event.receivedAt || stats.lastEventTimestamp;
+  });
+
+  return stats;
+}
 
 export async function POST(req: Request) {
+  const authError = requireApiKey(req);
+  if (authError) return authError;
+
   try {
     const eventData = await req.json();
 
@@ -29,22 +56,17 @@ export async function POST(req: Request) {
       );
     }
 
-    // Add metadata
     const enrichedEvent = {
       ...eventData,
       receivedAt: new Date().toISOString(),
       source: "guidewire-external",
-      id: `ext-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `ext-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     };
 
-    // Store the event
-    externalEvents.push(enrichedEvent);
-
-    // Update statistics
-    eventStats.totalEvents++;
-    eventStats.eventsByType[eventData.eventType] = (eventStats.eventsByType[eventData.eventType] || 0) + 1;
-    eventStats.eventsByEntity[eventData.entity] = (eventStats.eventsByEntity[eventData.entity] || 0) + 1;
-    eventStats.lastEventTimestamp = enrichedEvent.receivedAt;
+    const events = [...externalStore.events, enrichedEvent].slice(-1000);
+    externalStore.events = events;
+    externalStore.stats = buildEventStats(events);
+    saveExternalStore();
 
     console.log(`📨 External Event Received: ${eventData.entity} - ${eventData.eventType}`);
 
@@ -52,11 +74,7 @@ export async function POST(req: Request) {
       success: true,
       eventId: enrichedEvent.id,
       message: "Event received and processed successfully",
-      stats: {
-        totalEvents: eventStats.totalEvents,
-        eventsByType: eventStats.eventsByType,
-        eventsByEntity: eventStats.eventsByEntity,
-      }
+      stats: externalStore.stats,
     });
 
   } catch (error) {
@@ -69,22 +87,28 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
+  const events = externalStore.events.slice(-50);
+  const stats = externalStore.stats || buildEventStats(externalStore.events);
+
   return NextResponse.json({
-    events: externalEvents.slice(-50), // Return last 50 events
-    stats: eventStats,
-    totalStored: externalEvents.length,
+    events,
+    stats,
+    totalStored: externalStore.events.length,
   });
 }
 
 // Reset endpoint for testing
-export async function DELETE() {
-  externalEvents = [];
-  eventStats = {
+export async function DELETE(req: Request) {
+  const authError = requireApiKey(req);
+  if (authError) return authError;
+  externalStore.events = [];
+  externalStore.stats = {
     totalEvents: 0,
     eventsByType: {},
     eventsByEntity: {},
     lastEventTimestamp: null,
   };
+  await resetExternalStore();
 
   return NextResponse.json({ message: "External events reset successfully" });
 }

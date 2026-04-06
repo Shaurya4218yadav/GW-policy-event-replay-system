@@ -218,6 +218,7 @@ when Policy is updated {
                 <div className="bg-bg-elevated rounded-lg p-4 font-mono text-sm text-text-primary overflow-x-auto">
 {`curl -X POST http://localhost:3000/api/external/events \\
   -H "Content-Type: application/json" \\
+  -H "x-api-key: dev-guidewire-key" \\
   -d '{
     "entity": "Policy",
     "eventType": "UPDATE",
@@ -235,7 +236,10 @@ when Policy is updated {
                 <div className="bg-bg-elevated rounded-lg p-4 font-mono text-sm text-text-primary overflow-x-auto">
 {`fetch('/api/external/events', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'dev-guidewire-key'
+  },
   body: JSON.stringify({
     entity: 'Policy',
     eventType: 'UPDATE',
@@ -246,6 +250,29 @@ when Policy is updated {
 });`}
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="glass-panel rounded-xl p-6">
+            <h3 className="text-xl font-bold mb-4 text-text-primary">Local Quick Start</h3>
+            <div className="space-y-3 text-text-secondary text-sm">
+              <p>Run the app locally, then use the mock event generator or curl to POST events to <code className="font-mono">/api/external/events</code>.</p>
+              <p>The app stores policy and event history in <code className="font-mono">/data/store.json</code> and <code className="font-mono">/data/external-events.json</code>, so state persists across dev server restarts.</p>
+              <p>Use <code className="font-mono">dev-guidewire-key</code> as the default API key in local mode. In production, configure <code className="font-mono">GW_EXTERNAL_EVENTS_API_KEY</code>.</p>
+            </div>
+          </div>
+
+          <div className="glass-panel rounded-xl p-6">
+            <h3 className="text-xl font-bold mb-4 text-text-primary">What Still Needs Guidewire VM</h3>
+            <div className="space-y-3 text-text-secondary text-sm">
+              <p>This local project is a feature-level proof of concept. True Guidewire integration requires:</p>
+              <ul className="list-disc list-inside space-y-2">
+                <li>PolicyCenter/ClaimCenter screens and PCF page definitions</li>
+                <li>Guidewire entity model customization and data extension</li>
+                <li>Business rules and event hooks inside actual Guidewire rules</li>
+                <li>Real integration tests with Guidewire runtime and JVM-based services</li>
+              </ul>
+              <p>The current local build covers API simulation, event replay, validation, persistence, and monitoring without needing a Guidewire VM.</p>
             </div>
           </div>
         </div>

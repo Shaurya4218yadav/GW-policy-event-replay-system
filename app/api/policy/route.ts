@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { store } from "@/lib/store";
+import { store, saveStore } from "@/lib/store";
 
 export async function GET() {
-  return NextResponse.json(store!.policy);
+  return NextResponse.json(store.policy);
 }
 
 export async function POST(req: Request) {
   const newPolicy = await req.json();
-  store!.policy = newPolicy;
-  return NextResponse.json(store!.policy);
+  store.policy = newPolicy;
+  saveStore();
+  return NextResponse.json(store.policy);
 }

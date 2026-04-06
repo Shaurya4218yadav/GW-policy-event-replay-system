@@ -27,7 +27,7 @@ describe('External Events API', () => {
 
       const response = await fetch(BASE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-api-key': 'dev-guidewire-key' },
         body: JSON.stringify(eventData)
       });
 
@@ -57,7 +57,7 @@ describe('External Events API', () => {
 
       const response = await fetch(BASE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-api-key': 'dev-guidewire-key' },
         body: JSON.stringify(eventData)
       });
 
@@ -79,7 +79,7 @@ describe('External Events API', () => {
 
       const response = await fetch(BASE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-api-key': 'dev-guidewire-key' },
         body: JSON.stringify(invalidEventData)
       });
 
@@ -110,7 +110,7 @@ describe('External Events API', () => {
       for (const event of events) {
         await fetch(BASE_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'x-api-key': 'dev-guidewire-key' },
           body: JSON.stringify(event)
         });
       }
@@ -152,7 +152,7 @@ describe('External Events API', () => {
 
   describe('DELETE /external/events', () => {
     test('should reset all events and statistics', async () => {
-      const response = await fetch(BASE_URL, { method: 'DELETE' });
+      const response = await fetch(BASE_URL, { method: 'DELETE', headers: { 'x-api-key': 'dev-guidewire-key' } });
       expect(response.status).toBe(200);
 
       const result = await response.json();
@@ -199,7 +199,7 @@ describe('External Events API', () => {
       for (const event of policyEvents) {
         await fetch(BASE_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'x-api-key': 'dev-guidewire-key' },
           body: JSON.stringify(event)
         });
       }

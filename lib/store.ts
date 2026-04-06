@@ -1,8 +1,14 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { Policy } from "@/types/policy";
 import { ReplayEvent } from "@/types/event";
 
-// Simple in-memory storage for the demo.
-// Note: This will reset whenever the Next.js dev server restarts.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dataDir = path.join(__dirname, "../data");
+const storeFilePath = path.join(dataDir, "store.json");
+
 const initialPolicy: Policy = {
   id: "POL-001",
   name: "Standard Auto",
@@ -23,27 +29,44 @@ const initialEvent: ReplayEvent = {
   timestamp: new Date().toISOString(),
 };
 
-// Use global to handle HMR in development
-declare global {
-  var globalStore: {
-    policy: Policy;
-    events: ReplayEvent[];
-  } | undefined;
+interface StoreShape {
+  policy: Policy;
+  events: ReplayEvent[];
 }
 
-if (!global.globalStore) {
-  global.globalStore = {
-    policy: initialPolicy,
-    events: [initialEvent],
-  };
+function ensureDataFile<T>(filePath: string, defaultData: T): T {
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2), "utf-8");
+    return defaultData;
+  }
+
+  try {
+    const raw = fs.readFileSync(filePath, "utf-8");
+    return JSON.parse(raw) as T;
+  } catch (error) {
+    fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2), "utf-8");
+    return defaultData;
+  }
 }
 
-export const store = global.globalStore;
+const defaultStore: StoreShape = {
+  policy: initialPolicy,
+  events: [initialEvent],
+};
+
+export const store = ensureDataFile<StoreShape>(storeFilePath, defaultStore);
+
+export function saveStore() {
+  fs.writeFileSync(storeFilePath, JSON.stringify(store, null, 2), "utf-8");
+}
 
 export function resetStore() {
-  global.globalStore = {
-    policy: { ...initialPolicy },
-    events: [{ ...initialEvent, timestamp: new Date().toISOString() }],
-  };
-  return global.globalStore;
+  store.policy = { ...initialPolicy };
+  store.events = [{ ...initialEvent, timestamp: new Date().toISOString() }];
+  saveStore();
+  return store;
 }

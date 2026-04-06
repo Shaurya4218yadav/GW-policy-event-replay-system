@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ReplayEvent } from '@/types/event';
 import { reconstructState } from '@/lib/replayEngine';
 
@@ -14,19 +14,51 @@ interface ReplayViewProps {
 
 export default function ReplayView({ events, currentPolicy, onTimeSelect }: ReplayViewProps) {
   const [targetTime, setTargetTime] = useState('');
+  const [sliderIndex, setSliderIndex] = useState(0);
   const [reconstructedState, setReconstructedState] = useState<any>(null);
   const [steps, setSteps] = useState<{ event: ReplayEvent; resultingState: any }[]>([]);
   const [progression, setProgression] = useState<string[]>([]);
   const [isDebugMode, setIsDebugMode] = useState(false);
   const [expandedField, setExpandedField] = useState<string | null>(null);
 
-  const handleReplay = () => {
-    if (!targetTime) return;
-    const { state, steps: newSteps, progression: newProgression } = reconstructState(events, targetTime);
+  const sortedTimestamps = useMemo(
+    () => events
+      .map((event) => event.timestamp)
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime()),
+    [events]
+  );
+
+  const selectedTime = sortedTimestamps[sliderIndex] || targetTime;
+
+  useEffect(() => {
+    if (sortedTimestamps.length > 0) {
+      const lastIndex = sortedTimestamps.length - 1;
+      setSliderIndex(lastIndex);
+      setTargetTime(sortedTimestamps[lastIndex]);
+    }
+  }, [sortedTimestamps.join(',')]);
+
+  useEffect(() => {
+    if (!selectedTime) {
+      setReconstructedState(null);
+      setSteps([]);
+      setProgression([]);
+      return;
+    }
+
+    const { state, steps: newSteps, progression: newProgression } = reconstructState(events, selectedTime);
     setReconstructedState(state);
     setSteps(newSteps);
     setProgression(newProgression);
-    if (onTimeSelect) onTimeSelect(new Date(targetTime).toISOString());
+    if (onTimeSelect) onTimeSelect(new Date(selectedTime).toISOString());
+  }, [selectedTime, events, onTimeSelect]);
+
+  const handleReplay = () => {
+    if (!targetTime) return;
+    const index = sortedTimestamps.indexOf(targetTime);
+    if (index !== -1) {
+      setSliderIndex(index);
+    }
   };
   
   const getValidationResult = (field: keyof Policy) => {
@@ -176,14 +208,36 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
         {/* TEMPORAL OFFSET INPUT */}
         <div className="group relative">
           <label className="tool-label block mb-2 opacity-30 group-hover:opacity-100 transition-opacity">Temporal Offset Selection</label>
-          <div className="flex flex-col gap-6">
-            <input 
-              type="datetime-local" 
-              value={targetTime}
-              onChange={(e) => setTargetTime(e.target.value)}
-              className="w-full bg-transparent border-b border-white/5 py-2 forensic-text !text-foreground focus:border-accent transition-all cursor-pointer"
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1.4fr] gap-4">
+              <input 
+                type="datetime-local" 
+                value={targetTime}
+                onChange={(e) => setTargetTime(e.target.value)}
+                className="w-full bg-transparent border-b border-white/5 py-2 forensic-text !text-foreground focus:border-accent transition-all cursor-pointer"
+              />
+              <div className="flex flex-col justify-end gap-2">
+                <span className="text-[10px] uppercase tracking-[0.3em] text-text-secondary">Selected replay timestamp</span>
+                <span className="text-sm text-text-primary break-all">{selectedTime || 'No timestamp selected'}</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={Math.max(sortedTimestamps.length - 1, 0)}
+              value={sliderIndex}
+              onChange={(e) => {
+                const index = Number(e.target.value);
+                setSliderIndex(index);
+                setTargetTime(sortedTimestamps[index] || '');
+              }}
+              className="w-full accent-accent"
+              disabled={sortedTimestamps.length <= 1}
             />
-            
+            <div className="text-xs text-text-secondary flex justify-between">
+              <span>{sortedTimestamps[0] ? new Date(sortedTimestamps[0]).toLocaleString() : '—'}</span>
+              <span>{sortedTimestamps[sortedTimestamps.length - 1] ? new Date(sortedTimestamps[sortedTimestamps.length - 1]).toLocaleString() : '—'}</span>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <button 
                 onClick={handleReplay}
