@@ -9,6 +9,9 @@ const NAV_LINKS = [
   { label: "Overview", href: "/overview", roles: ["user", "analyst", "auditor", "admin", null] },
   { label: "Dashboard", href: "/dashboard", roles: ["user", "analyst", "admin"] },
   { label: "Simulation", href: "/simulation", roles: ["user", "analyst", "admin"] },
+  { label: "Demo", href: "/demo", roles: ["user", "analyst", "auditor", "admin", null] },
+  { label: "Monitoring", href: "/monitoring", roles: ["user", "analyst", "auditor", "admin", null] },
+  { label: "Docs", href: "/docs", roles: ["user", "analyst", "auditor", "admin", null] },
   { label: "Audit", href: "/audit", roles: ["auditor", "admin"] },
   { label: "Settings", href: "/settings", roles: ["user", "analyst", "auditor", "admin"] },
 ];

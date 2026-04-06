@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Guidewire Event Replay & Audit Engine
 
-## Getting Started
+A comprehensive event-driven audit and replay system for Guidewire PolicyCenter and ClaimCenter, built as a proof-of-concept with external API integration.
 
-First, run the development server:
+## 🚀 Features
+
+### Core Functionality
+- **Event Replay Engine**: Reconstruct policy/claim state at any historical timestamp
+- **Audit Timeline**: Chronological event visualization with filtering
+- **Validation Engine**: Compare reconstructed vs. expected state
+- **Demo Scenarios**: Interactive demonstrations of real insurance workflows
+
+### External Integration
+- **REST API Endpoints**: Receive events from Guidewire systems
+- **Real-time Monitoring**: Live dashboard for event streaming
+- **API Documentation**: Complete integration guide for Guidewire developers
+
+### Testing & Quality
+- **Integration Tests**: Comprehensive API testing suite
+- **Test Runner**: Automated validation of all components
+- **Monitoring Dashboard**: Real-time system health and statistics
+
+## 🛠️ Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Run tests
+npm run test:runner
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) to explore the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📊 Available Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **/demo** - Interactive demo scenarios
+- **/monitoring** - External event monitoring dashboard
+- **/docs** - API documentation and integration guide
 
-## Learn More
+## 🔌 API Endpoints
 
-To learn more about Next.js, take a look at the following resources:
+### External Event Streaming
+```
+POST /api/external/events
+```
+Receive events from Guidewire systems for external processing and monitoring.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Monitoring & Statistics
+```
+GET /api/external/events
+```
+Retrieve events and statistics for monitoring.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🧪 Testing
 
-## Deploy on Vercel
+```bash
+# Run all tests
+npm test
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Run with custom test runner
+npm run test:runner
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📚 Documentation
+
+Complete API documentation and Guidewire integration guide available at `/docs`.
+
+## 🎯 Demo Scenarios
+
+Five pre-built scenarios demonstrating real insurance workflows:
+1. Policy Pricing Change
+2. Claim Impact on Policy  
+3. Policy Endorsement
+4. Audit Investigation
+5. System Recovery
