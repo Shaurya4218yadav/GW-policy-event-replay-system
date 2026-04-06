@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import { ReplayEvent } from '@/types/event';
 
 interface EventTimelineProps {
@@ -9,7 +10,14 @@ interface EventTimelineProps {
 
 export default function EventTimeline({ events, activeTimestamp, isFocusMode }: EventTimelineProps) {
   const [activeFilter, setActiveFilter] = useState<'all' | 'anomalies' | 'financial' | 'lifecycle'>('all');
-  const lastUpdated = events.length > 0 ? new Date(events[events.length - 1].timestamp).toLocaleTimeString() : 'N/A';
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const lastUpdated = events.length > 0 && mounted ? new Date(events[events.length - 1].timestamp).toLocaleTimeString() : 'N/A';
+
 
   const isActive = (timestamp: string) => {
     if (!activeTimestamp) return true;
@@ -155,7 +163,10 @@ export default function EventTimeline({ events, activeTimestamp, isFocusMode }: 
                   {/* Timestamp & Hash HUD */}
                   <div className="flex items-center gap-3 mb-1 opacity-20 group-hover:opacity-100 transition-opacity duration-500">
                     <span className="forensic-text text-[7px] tracking-widest">{telemetry.hash}</span>
-                    <span className="forensic-text text-[7px] tracking-widest">{new Date(event.timestamp).toLocaleTimeString([], { hour12: false, second: "2-digit" })}</span>
+                    <span className="forensic-text text-[7px] tracking-widest">
+                      {mounted ? new Date(event.timestamp).toLocaleTimeString([], { hour12: false, second: "2-digit" }) : '--:--:--'}
+                    </span>
+
                   </div>
 
                   {/* Event Type Name */}

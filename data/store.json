@@ -2,8 +2,8 @@
   "policy": {
     "id": "POL-001",
     "name": "Standard Auto",
-    "premium": 0,
-    "coverageLimit": 50000,
+    "premium": 43455,
+    "coverageLimit": 514678,
     "status": "Draft"
   },
   "events": [
@@ -46,6 +46,51 @@
         "premium": 4350
       },
       "timestamp": "2026-04-06T05:44:38.167Z"
+    },
+    {
+      "id": "ebd31b30-cb10-4b0f-a75e-0e30c9bd217c",
+      "type": "CLAIM_REPORTED",
+      "timestamp": "2026-04-06T06:13:21.801Z"
+    },
+    {
+      "id": "453bee41-f14d-4125-aa7d-c56f1d7daf21",
+      "type": "CLAIM_APPROVED",
+      "payload": {
+        "payout": 5000
+      },
+      "timestamp": "2026-04-06T06:13:22.801Z"
+    },
+    {
+      "id": "f5bac8ea-b208-42a3-a9c1-815d5aee933f",
+      "type": "POLICY_QUOTED",
+      "payload": {
+        "premium": 4350
+      },
+      "timestamp": "2026-04-06T06:13:23.801Z"
+    },
+    {
+      "id": "bcd41ebb-b4f7-4faa-81c2-25a399bad662",
+      "type": "POLICY_ENDORSED",
+      "payload": {
+        "premium": 4350
+      },
+      "timestamp": "2026-04-06T06:13:24.801Z"
+    },
+    {
+      "id": "f1eee0ae-2f63-4389-a269-0769ffc33a45",
+      "type": "POLICY_QUOTED",
+      "payload": {
+        "premium": 43455
+      },
+      "timestamp": "2026-04-06T06:14:27.871Z"
+    },
+    {
+      "id": "a884bd23-167b-4c0e-be22-edf16c624168",
+      "type": "POLICY_ENDORSED",
+      "payload": {
+        "coverageLimit": 514678
+      },
+      "timestamp": "2026-04-06T06:14:27.871Z"
     }
   ]
 }

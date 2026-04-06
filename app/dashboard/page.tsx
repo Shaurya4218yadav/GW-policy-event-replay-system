@@ -6,8 +6,14 @@ import PolicyCard from "../components/PolicyCard";
 
 export default function DashboardPage() {
   const { policy, events } = useAppContext();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const recentEvents = [...events].reverse().slice(0, 8);
+
 
   return (
     <div className="relative min-h-screen bg-background text-foreground transition-all duration-700 overflow-hidden pt-24 px-12 selection:bg-accent selection:text-black">
@@ -68,7 +74,10 @@ export default function DashboardPage() {
                 <div key={event.id} className="group relative pl-4 border-l border-white/5 hover:border-cyan-400/40 transition-colors py-1">
                   <div className="flex justify-between items-center mb-1.5">
                     <span className="forensic-text !text-[8px] text-cyan-400 font-black opacity-60 group-hover:opacity-100 transition-opacity">S-{String(idx + 1).padStart(2, '0')}</span>
-                    <span className="forensic-text !text-[7.5px] text-text-dim/40 group-hover:text-text-dim transition-colors">{new Date(event.timestamp).toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' })}</span>
+                    <span className="forensic-text !text-[7.5px] text-text-dim/40 group-hover:text-text-dim transition-colors">
+                      {mounted ? new Date(event.timestamp).toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' }) : '--:--:--'}
+                    </span>
+
                   </div>
                   <div className="forensic-text !text-[10px] text-text-primary/70 truncate uppercase tracking-[0.2em] font-bold group-hover:text-accent transition-colors">
                     {event.type.replace('POLICY_', '')}

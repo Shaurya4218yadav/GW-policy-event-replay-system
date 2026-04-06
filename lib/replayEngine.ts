@@ -5,14 +5,20 @@ export function reconstructState(events: ReplayEvent[], targetTime: string) {
   const steps: { event: ReplayEvent; resultingState: any }[] = [];
   const progression: string[] = [];
 
+  if (!targetTime && events.length > 0) {
+    // If no target time, return the initial state from the first event
+    const firstEvent = events.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())[0];
+    return { state: { ...firstEvent.payload }, steps: [{ event: firstEvent, resultingState: firstEvent.payload }], progression: ['Draft'] };
+  }
+  
   if (!targetTime) return { state, steps, progression };
 
   const targetDate = new Date(targetTime).getTime();
 
-  events
+  const sortedEvents = [...events].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+  sortedEvents
     .filter(e => new Date(e.timestamp).getTime() <= targetDate)
-    .slice() // copy array before sorting
-    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
     .forEach(event => {
       switch (event.type) {
         case 'POLICY_CREATED':
@@ -59,6 +65,11 @@ export function reconstructState(events: ReplayEvent[], targetTime: string) {
         resultingState: state ? { ...state } : null
       });
     });
+
+  // FINAL SAFETY: If we have events but no state was reconstructed (e.g. filter excluded everything)
+  if (!state && sortedEvents.length > 0) {
+      state = { ...sortedEvents[0].payload };
+  }
 
   return { state, steps, progression };
 }

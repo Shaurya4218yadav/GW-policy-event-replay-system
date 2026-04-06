@@ -6,7 +6,13 @@ import EventTimeline from "../components/EventTimeline";
 import { Policy } from "@/types/policy";
 
 export default function AuditPage() {
-  const { events, policy, role } = useAppContext();
+  const { events, policy, role, logout } = useAppContext();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
 
   const getDerivedFrom = (field: keyof Policy) => {
     return events
@@ -44,8 +50,9 @@ export default function AuditPage() {
               <div className="absolute w-2 h-2 rounded-full bg-bg-elevated border border-white/10 group-hover/item:border-accent group-hover/item:bg-accent -left-[45px] top-1.5 transition-all glow-primary" />
               <div className="flex justify-between items-start mb-3">
                 <span className="forensic-text !text-[8.5px] font-black text-text-dim tracking-widest uppercase opacity-40 group-hover/item:opacity-100 transition-all">
-                   {new Date(item.ts).toLocaleString([], { hour12: false, month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).toUpperCase()}
+                   {mounted ? new Date(item.ts).toLocaleString([], { hour12: false, month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).toUpperCase() : 'LOADING...'}
                 </span>
+
                 <span className="forensic-text !text-[9.5px] text-accent font-black tracking-widest opacity-60 group-hover/item:opacity-100 transition-all group-hover/item:drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">{item.type}</span>
               </div>
               <div className="tool-value !text-[11px] text-text-primary/70 group-hover/item:text-text-primary transition-all flex items-center gap-2">
@@ -66,12 +73,25 @@ export default function AuditPage() {
   };
 
   if (role !== "auditor" && role !== "admin") {
-    return <div className="p-32 text-center forensic-text uppercase tracking-[0.4em] text-text-dim/60 font-black flex flex-col items-center gap-6">
-      <div className="w-16 h-px bg-status-error/40 glow-secondary" />
-      ACCESS_DENIED // ADMIN_STATE_ELEVATION_REQUIRED
-      <div className="w-16 h-px bg-status-error/40 glow-secondary" />
-    </div>;
+    return (
+      <div className="p-32 text-center forensic-text uppercase tracking-[0.4em] text-text-dim/60 font-black flex flex-col items-center gap-8">
+        <div className="w-16 h-px bg-status-error/40 glow-secondary" />
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-status-error">ACCESS_DENIED</span>
+          <span className="text-[10px] opacity-40 lowercase tracking-widest font-bold">// admin_state_elevation_required</span>
+        </div>
+        <div className="w-16 h-px bg-status-error/40 glow-secondary" />
+        
+        <button 
+          onClick={logout}
+          className="mt-4 px-8 py-3 rounded-full border border-white/10 hover:border-accent/40 text-[9px] tracking-[0.3em] transition-all hover:bg-accent/5 group"
+        >
+          <span className="group-hover:text-accent transition-colors">SWITCH_IDENTITY_GATEWAY</span>
+        </button>
+      </div>
+    );
   }
+
 
   return (
     <div className="relative min-h-screen bg-bg-base text-text-primary transition-all duration-700 overflow-hidden pt-24 px-12 selection:bg-accent selection:text-black">
