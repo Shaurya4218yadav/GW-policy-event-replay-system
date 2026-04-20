@@ -25,7 +25,8 @@ export default function SimulationPanel({ onSimulate, currentPremium, currentCov
           currentCoverage
         }),
       });
-      const generatedEvents = await res.json();
+      const data = await res.json();
+      const generatedEvents = data.events || [];
       
       if (generatedEvents.length > 0) {
         onSimulate(generatedEvents);

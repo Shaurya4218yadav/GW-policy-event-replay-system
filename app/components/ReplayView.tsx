@@ -3,6 +3,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ReplayEvent } from '@/types/event';
 import { reconstructState } from '@/lib/replayEngine';
+import { performAudit, createSafeAuditReport } from '@/lib/validation';
+import { AuditReport } from '@/types/event';
 
 import { Policy } from '@/types/policy';
 
@@ -20,6 +22,7 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
   const [progression, setProgression] = useState<string[]>([]);
   const [isDebugMode, setIsDebugMode] = useState(false);
   const [expandedField, setExpandedField] = useState<string | null>(null);
+  const [auditReport, setAuditReport] = useState<AuditReport>(createSafeAuditReport({}));
 
   const sortedTimestamps = useMemo(
     () => events
@@ -43,15 +46,18 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
       setReconstructedState(null);
       setSteps([]);
       setProgression([]);
+      setAuditReport(createSafeAuditReport({}));
       return;
     }
 
-    const { state, steps: newSteps, progression: newProgression } = reconstructState(events, selectedTime);
-    setReconstructedState(state);
-    setSteps(newSteps);
-    setProgression(newProgression);
+    const report = performAudit(events, currentPolicy, selectedTime);
+    setAuditReport(createSafeAuditReport(report));
+    setReconstructedState(report.replay.state);
+    setSteps(report.replay.steps);
+    setProgression(report.replay.progression);
+    
     if (onTimeSelect) onTimeSelect(new Date(selectedTime).toISOString());
-  }, [selectedTime, events, onTimeSelect]);
+  }, [selectedTime, events, currentPolicy, onTimeSelect]);
 
   const handleReplay = () => {
     if (!targetTime) return;
@@ -138,13 +144,13 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
         <div className="grid grid-cols-2 gap-4">
           <div>
             <div className="text-[9px] text-muted uppercase tracking-widest mb-1">Historical</div>
-            <div className="text-sm font-mono text-muted-foreground">
-              {typeof reconstructedState[field] === 'number' ? `₹${reconstructedState[field].toLocaleString()}` : String(reconstructedState[field] ?? 'N/A')}
+            <div className={`text-sm font-mono ${!reconstructedState[field] ? "text-muted-foreground opacity-50" : "text-muted-foreground"}`}>
+              {typeof reconstructedState[field] === 'number' ? `₹${reconstructedState[field].toLocaleString()}` : String(reconstructedState[field] ?? '—')}
             </div>
           </div>
           <div>
-            <div className="text-[9px] text-muted uppercase tracking-widest mb-1">Current</div>
-            <div className={`text-sm font-mono ${isMatch ? 'text-foreground' : 'text-red-500'}`}>
+            <div className="text-[9px] text-muted uppercase tracking-widest mb-1">Live DB State</div>
+            <div className={`text-sm font-mono ${isMatch ? 'text-foreground' : 'text-red-500 font-bold'}`}>
               {typeof currentPolicy[field] === 'number' ? `₹${currentPolicy[field].toLocaleString()}` : String(currentPolicy[field])}
             </div>
           </div>
@@ -175,6 +181,11 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
       </div>
     );
   };
+
+  if (!auditReport) return null;
+
+  const anomalies = auditReport?.anomalies ?? [];
+  const hasAnomalies = anomalies.length > 0;
 
   return (
     <div className="glass-panel p-6 rounded-2xl animate-hud-slide">
@@ -272,7 +283,19 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
           </div>
         </div>
 
-        {reconstructedState && (
+        {/* EMPTY STATE FALLBACK */}
+        {!auditReport.replay?.state && (
+          <div className="glass-panel p-8 rounded-3xl border-status-warning/20 bg-status-warning/5 text-center mt-8">
+            <h3 className="tool-label !text-status-warning font-black tracking-[0.2em] mb-4">
+              [ NO_VALID_STATE_RECONSTRUCTED ]
+            </h3>
+            <p className="forensic-text text-text-secondary leading-relaxed italic !text-[10px] uppercase tracking-widest opacity-60">
+              The Engine could not reconstruct a valid state from the available events at this timestamp.
+            </p>
+          </div>
+        )}
+
+        {auditReport.replay?.state && (
           <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
             {/* LIFECYCLE PROGRESSION */}
             <div className="space-y-3">
@@ -293,13 +316,71 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
 
             {/* FIELD VALIDATION OVERLAYS */}
             <div className="space-y-4">
-              <div className="tool-label !text-[7px] opacity-30">FORENSIC_STATE_STREAMS</div>
+              <div className="flex justify-between items-center">
+                <div className="tool-label !text-[7px] opacity-30">FORENSIC_STATE_STREAMS</div>
+                {auditReport.driftDetected ? (
+                  <span className="text-[9px] uppercase tracking-widest font-bold text-status-error bg-status-error/10 px-2 py-0.5 rounded-sm animate-pulse flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-status-error inline-block" />
+                    System Drift Detected
+                  </span>
+                ) : (
+                  <span className="text-[9px] uppercase tracking-widest font-bold text-status-success bg-status-success/10 px-2 py-0.5 rounded-sm flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-status-success inline-block" />
+                    System Consistent
+                  </span>
+                )}
+              </div>
               <div className="grid grid-cols-1 gap-2">
                 {renderFieldValidation("Risk Premium", "premium")}
                 {renderFieldValidation("Liability Cap", "coverageLimit")}
                 {renderFieldValidation("Policy Status", "status")}
               </div>
             </div>
+
+            {/* AUDIT METRICS */}
+            {auditReport.integrityScore && (
+              <div className="space-y-4 pt-6 border-t border-white/5 animate-in fade-in slide-in-from-bottom-2">
+                <div className="tool-label !text-[7px] opacity-30">INTEGRITY & IMPACT ANALYSIS</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className={`p-4 rounded-xl border ${auditReport?.integrityScore?.status === 'HEALTHY' ? 'border-status-success/20 bg-status-success/5 text-status-success' : auditReport?.integrityScore?.status === 'WARNING' ? 'border-status-warning/20 bg-status-warning/5 text-status-warning' : 'border-status-error/20 bg-status-error/5 text-status-error'}`}>
+                    <div className="text-[8px] uppercase tracking-widest mb-1 opacity-60">Integrity Score</div>
+                    <div className="text-2xl font-black">{auditReport?.integrityScore?.score ?? 100}/100</div>
+                    <div className="text-[9px] mt-1 font-bold tracking-widest">{auditReport?.integrityScore?.status ?? 'HEALTHY'}</div>
+                  </div>
+                  
+                  <div className={`p-4 rounded-xl border ${auditReport?.impactAnalysis?.riskLevel === 'LOW' ? 'border-white/10' : auditReport?.impactAnalysis?.riskLevel === 'MEDIUM' ? 'border-status-warning/20 bg-status-warning/5 text-status-warning' : 'border-status-error/20 bg-status-error/5 text-status-error'}`}>
+                     <div className="text-[8px] uppercase tracking-widest mb-1 opacity-60">Business Impact</div>
+                     <div className="text-2xl font-black">
+                       {auditReport?.impactAnalysis?.financialImpact === 0 ? 'N/A' : `₹${(auditReport?.impactAnalysis?.financialImpact ?? 0).toLocaleString()}`}
+                     </div>
+                     <div className={`text-[9px] mt-1 font-bold tracking-widest`}>
+                       RISK: {auditReport?.impactAnalysis?.riskLevel ?? 'LOW'}
+                     </div>
+                  </div>
+                </div>
+
+                {hasAnomalies && (
+                  <div className="mt-4 p-4 rounded-xl border border-status-error/20 bg-status-error/5 flex flex-col gap-2">
+                    <div className="text-[8px] uppercase tracking-widest opacity-60 text-status-error font-bold mb-2">DETECTED ANOMALIES</div>
+                    {anomalies.map((anom, idx) => (
+                      <div key={idx} className="flex gap-2">
+                        <span className="text-[10px] font-bold text-status-error w-4 text-center mt-0.5">!</span>
+                        <div>
+                          <p className="text-[10px] font-bold text-status-error uppercase tracking-widest">{anom?.type ?? 'UNKNOWN'}</p>
+                          <p className="text-[10px] text-status-error/60 leading-tight italic">{anom?.message ?? 'No details'}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {auditReport?.impactAnalysis?.explanation && (
+                  <div className="text-[10px] text-muted-foreground italic rounded bg-white/[0.02] p-3 border border-white/5">
+                    "{auditReport?.impactAnalysis?.explanation}"
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* DEBUG TRACE STREAM */}
             {isDebugMode && steps.length > 0 && (

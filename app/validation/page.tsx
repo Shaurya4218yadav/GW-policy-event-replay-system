@@ -30,9 +30,9 @@ export default function ValidationPage() {
       const selectedEvent = sortedEvents[sliderIndex];
       if (selectedEvent) {
         console.log(`Reconstructing state at index ${sliderIndex} (TS: ${selectedEvent.timestamp})`);
-        const result = reconstructState(sortedEvents, selectedEvent.timestamp);
-        setReconstructedState(result.state);
-        setProgressionSteps(result.progression);
+        const { replay } = reconstructState(sortedEvents, selectedEvent.timestamp);
+        setReconstructedState(replay.state);
+        setProgressionSteps(replay.progression);
       }
     }
   }, [sliderIndex, sortedEvents]);

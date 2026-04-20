@@ -1,3 +1,20 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * EXTERNAL EVENTS API — Guidewire Integration Endpoint
+ * ═══════════════════════════════════════════════════════════════════════════
+ * POST   /api/external/events  → Ingest events (single or batch)
+ * GET    /api/external/events  → Retrieve recent external events
+ * DELETE /api/external/events  → Reset external event store
+ *
+ * Enhancements over previous version:
+ * - Batch ingestion (accept array of events)
+ * - Out-of-order event handling (sorts before storage)
+ * - Sequence integrity maintenance
+ * - Guidewire entity enrichment
+ * - Delayed timestamp support
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
 import { NextResponse } from "next/server";
 import { externalStore, saveExternalStore, resetExternalStore } from "@/lib/externalStore";
 
@@ -41,40 +58,99 @@ function buildEventStats(events: Array<Record<string, any>>) {
   return stats;
 }
 
+/**
+ * Assigns a deterministic sequence number to events based on their
+ * position after timestamp-sorting. This ensures sequence integrity
+ * even when events arrive out of order.
+ */
+function assignSequences(events: Array<Record<string, any>>): Array<Record<string, any>> {
+  // Sort by timestamp for proper sequencing
+  const sorted = [...events].sort((a, b) => {
+    const timeA = new Date(a.timestamp).getTime();
+    const timeB = new Date(b.timestamp).getTime();
+    return timeA - timeB;
+  });
+
+  return sorted.map((event, index) => ({
+    ...event,
+    metadata: {
+      ...event.metadata,
+      sequence: index + 1,
+    },
+  }));
+}
+
 export async function POST(req: Request) {
   const authError = requireApiKey(req);
   if (authError) return authError;
 
   try {
-    const eventData = await req.json();
+    const rawBody = await req.json();
 
-    // Validate required fields
-    if (!eventData.entity || !eventData.eventType || !eventData.timestamp) {
-      return NextResponse.json(
-        { error: "Missing required fields: entity, eventType, timestamp" },
-        { status: 400 }
-      );
+    // ── Support batch ingestion ──────────────────────────────────────
+    // Accept either a single event object or an array of events
+    const eventDataArray = Array.isArray(rawBody) ? rawBody : [rawBody];
+
+    const results: Array<{ success: boolean; eventId?: string; error?: string }> = [];
+    const newEvents: Array<Record<string, any>> = [];
+
+    for (const eventData of eventDataArray) {
+      // Validate required fields
+      if (!eventData.entity || !eventData.eventType || !eventData.timestamp) {
+        results.push({
+          success: false,
+          error: `Missing required fields: entity, eventType, timestamp`,
+        });
+        continue;
+      }
+
+      const enrichedEvent = {
+        ...eventData,
+        receivedAt: new Date().toISOString(),
+        source: "guidewire-external",
+        id: `ext-${Date.now()}-${eventData.eventType}-${results.length}`,
+      };
+
+      newEvents.push(enrichedEvent);
+      results.push({
+        success: true,
+        eventId: enrichedEvent.id,
+      });
     }
 
-    const enrichedEvent = {
-      ...eventData,
-      receivedAt: new Date().toISOString(),
-      source: "guidewire-external",
-      id: `ext-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-    };
+    // ── Merge and sort all events by timestamp ─────────────────────
+    // This handles out-of-order and delayed events by re-sorting
+    const allEvents = [...externalStore.events, ...newEvents];
 
-    const events = [...externalStore.events, enrichedEvent].slice(-1000);
-    externalStore.events = events;
-    externalStore.stats = buildEventStats(events);
+    // Sort by timestamp to handle out-of-order events
+    allEvents.sort((a, b) => {
+      const timeA = new Date(a.timestamp).getTime();
+      const timeB = new Date(b.timestamp).getTime();
+      return timeA - timeB;
+    });
+
+    // Re-assign sequences after sorting to maintain integrity
+    const sequencedEvents = assignSequences(allEvents).slice(-1000);
+
+    externalStore.events = sequencedEvents;
+    externalStore.stats = buildEventStats(sequencedEvents);
     saveExternalStore();
 
-    console.log(`📨 External Event Received: ${eventData.entity} - ${eventData.eventType}`);
+    const eventsIngested = results.filter(r => r.success).length;
+    const eventsFailed = results.filter(r => !r.success).length;
+
+    console.log(`📨 External Events Received: ${eventsIngested} ingested, ${eventsFailed} failed`);
 
     return NextResponse.json({
-      success: true,
-      eventId: enrichedEvent.id,
-      message: "Event received and processed successfully",
+      success: eventsFailed === 0,
+      results,
+      summary: {
+        ingested: eventsIngested,
+        failed: eventsFailed,
+        totalStored: externalStore.events.length,
+      },
       stats: externalStore.stats,
+      message: `${eventsIngested} event(s) received and processed successfully`,
     });
 
   } catch (error) {

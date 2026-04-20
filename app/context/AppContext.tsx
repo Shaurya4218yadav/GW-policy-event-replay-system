@@ -44,6 +44,10 @@ const initialEvent: ReplayEvent = {
     status: "Draft",
   },
   timestamp: new Date().toISOString(),
+  policyId: "POL-001",
+  source: "SYSTEM",
+  reasoning: "Initial policy creation",
+  metadata: { sequence: 1 },
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
