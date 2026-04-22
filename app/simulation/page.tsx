@@ -120,7 +120,7 @@ export default function SimulationPage() {
     }
     
     setExecutionPhase("FINALLY");
-    setExecutionLogs((prev) => [...prev, `[ SIMULATION COMPLETE ]`]);
+    setExecutionLogs((prev) => [...prev, `[ Simulation Complete ]`]);
     await new Promise((r) => setTimeout(r, 1000));
     setIsExecuting(false);
   };
@@ -132,15 +132,15 @@ export default function SimulationPage() {
       {/* HUD HEADER - FLOATING METADATA */}
       <div className={`fixed top-16 left-12 z-30 transition-all duration-1000 ${isFocusMode ? 'opacity-20 blur-sm' : 'opacity-100'}`}>
         <div className="flex flex-col gap-0.5">
-          <h1 className="tool-title !text-lg tracking-tighter uppercase flex items-center gap-3">
+          <h1 className="tool-title !text-xl tracking-tighter flex items-center gap-3">
              <span className="w-1 h-3 bg-signal-gradient rounded-full glow-primary" />
-             <span className="text-signal-gradient font-black">FORENSIC_ENGINE_v4</span>
+             <span className="text-signal-gradient font-black">Endorsement Simulator</span>
           </h1>
-          <div className="flex items-center gap-4 forensic-text uppercase tracking-[0.4em] font-bold !text-[8.5px] pl-4 mt-1">
-             <span className="text-text-secondary">AUTH_ROLE:</span>
+          <div className="flex items-center gap-4 uppercase tracking-[0.2em] font-bold !text-[9.5px] pl-4 mt-1">
+             <span className="text-text-secondary capitalize tracking-wider">Auth Role:</span>
              <span className="text-accent">{role?.toUpperCase() || 'GUEST'}</span>
              <span className="w-1.5 h-px bg-white/10" />
-             <span className="text-text-secondary">REPLICANT:</span>
+             <span className="text-text-secondary capitalize tracking-wider">Event Count:</span>
              <span className="text-text-primary">0x{events.length.toString(16).padStart(4, '0')}</span>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function SimulationPage() {
             isFocusMode ? 'border-accent/40 bg-accent/5' : 'hover:border-white/10'
           }`}
         >
-          <span className="forensic-text !text-[8px] tracking-[0.3em] font-black group-hover:text-text-primary transition-colors">FOCUS_MODE</span>
+          <span className="text-xs tracking-widest font-black group-hover:text-text-primary transition-colors capitalize">Focus Mode</span>
           <div className={`w-1.5 h-1.5 rounded-full transition-all duration-700 ${isFocusMode ? 'bg-accent glow-primary scale-125' : 'bg-white/10'}`} />
         </button>
       </div>
@@ -167,9 +167,9 @@ export default function SimulationPage() {
                <div className="w-16 h-1.5 bg-white/5 rounded-full mb-8 overflow-hidden">
                   <div className="h-full bg-signal-gradient animate-pulse" style={{ width: `${(currentStep / totalSteps) * 100}%` }} />
                </div>
-               <h3 className="tool-label !text-accent-secondary tracking-[0.5em] mb-4 font-black animate-pulse">[ EXECUTION_SEQUENCE ]</h3>
+               <h3 className="tool-label !text-accent-secondary tracking-[0.5em] mb-4 font-black animate-pulse">[ Execution Sequence ]</h3>
                <div className="tool-value !text-lg mb-8 flex flex-col items-center gap-2">
-                  <span className="tool-label !text-[7px] text-text-dim tracking-[0.2em]">CURRENT_PHASE</span>
+                  <span className="tool-label !text-[11px] text-text-dim tracking-wider capitalize">Current Phase</span>
                   <span className="tracking-[0.2em] font-black uppercase text-text-primary px-6 py-2 glass-panel rounded-full border-accent/10">{executionPhase}</span>
                </div>
                <div className="forensic-text italic text-[10px] text-text-secondary h-12 flex items-center justify-center bg-white/[0.02] w-full rounded-xl border border-white/5">
@@ -212,12 +212,12 @@ export default function SimulationPage() {
           />
         ) : (
           <div className="glass-panel p-8 rounded-3xl border-status-error/10 bg-status-error/[0.02]">
-            <h3 className="tool-label !text-status-error font-black tracking-[0.2em] mb-4 flex items-center gap-3">
+            <h3 className="tool-label !text-status-error font-black tracking-widest mb-4 flex items-center gap-3 capitalize text-sm">
                <span className="w-1.5 h-1.5 rounded-full bg-status-error animate-pulse" />
-               REPLAY_SEQUENCE_LOCKED
+               Replay Sequence Locked
             </h3>
-            <p className="forensic-text text-text-secondary leading-relaxed italic !text-[10px] uppercase tracking-widest opacity-60">
-              UNAUTHORIZED_CREDENTIALS: REQUIRES_ADMIN_STATE_ELEVATION.
+            <p className="text-text-secondary leading-relaxed italic font-semibold tracking-wider text-xs opacity-80">
+              Unauthorized Access: Requires Admin Elevation.
             </p>
           </div>
         )}

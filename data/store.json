@@ -91,6 +91,125 @@
         "coverageLimit": 514678
       },
       "timestamp": "2026-04-06T06:14:27.871Z"
+    },
+    {
+      "id": "0db8375b-37ff-4810-b2f1-7bdb36507b1c",
+      "type": "CLAIM_REPORTED",
+      "timestamp": "2026-04-22T05:59:02.779Z"
+    },
+    {
+      "id": "e6486f30-539c-49c8-aae0-838ccc84c0b0",
+      "type": "CLAIM_APPROVED",
+      "payload": {
+        "payout": 5000
+      },
+      "timestamp": "2026-04-22T05:59:03.779Z"
+    },
+    {
+      "id": "7d9e4a1d-5dd5-4e2d-adb9-32b093499d9b",
+      "type": "POLICY_QUOTED",
+      "payload": {
+        "premium": 4200
+      },
+      "timestamp": "2026-04-22T05:59:04.779Z"
+    },
+    {
+      "id": "23755942-6972-4e6c-b080-a002a19e3c9e",
+      "type": "POLICY_ENDORSED",
+      "payload": {
+        "premium": 4200
+      },
+      "timestamp": "2026-04-22T05:59:05.779Z"
+    },
+    {
+      "id": "ac2d84b1-5ed2-46ab-969a-eafd6faf3ac1",
+      "type": "CLAIM_REPORTED",
+      "timestamp": "2026-04-22T07:56:10.746Z"
+    },
+    {
+      "id": "c2b37348-3c26-420e-bf2f-af16acf4b0fc",
+      "type": "CLAIM_APPROVED",
+      "payload": {
+        "payout": 5000
+      },
+      "timestamp": "2026-04-22T07:56:11.746Z"
+    },
+    {
+      "id": "8076a9b8-bb84-40dd-8c08-0819bc94a0e0",
+      "type": "POLICY_QUOTED",
+      "payload": {
+        "premium": 4200
+      },
+      "timestamp": "2026-04-22T07:56:12.746Z"
+    },
+    {
+      "id": "727bff6b-c44c-4746-8da5-b276ac631370",
+      "type": "POLICY_ENDORSED",
+      "payload": {
+        "premium": 4200
+      },
+      "timestamp": "2026-04-22T07:56:13.746Z"
+    },
+    {
+      "id": "5e820ce6-f720-4bed-9935-7158092b23e0",
+      "type": "FRAUD_FLAG_CLEARED",
+      "timestamp": "2026-04-22T08:26:13.992Z"
+    },
+    {
+      "id": "ed1f54d9-ee27-4524-8fcb-1e9daf3ff807",
+      "type": "FRAUD_FLAG_CLEARED",
+      "payload": {
+        "flagId": "F-PUMP-ebd31b30-cb10-4b0f-a75e-0e30c9bd217c"
+      },
+      "timestamp": "2026-04-22T08:32:19.837Z"
+    },
+    {
+      "id": "af076053-4718-4bc1-b56c-503873f34bab",
+      "type": "POLICY_CANCELLED",
+      "payload": {
+        "reason": "Fraud Investigation Concluded: Terminated"
+      },
+      "timestamp": "2026-04-22T08:32:20.879Z"
+    },
+    {
+      "id": "d6d5d392-dbb3-4b92-9412-92d8f46951d3",
+      "type": "POLICY_CANCELLED",
+      "payload": {
+        "reason": "Fraud Investigation Concluded: Terminated"
+      },
+      "timestamp": "2026-04-22T08:32:22.336Z"
+    },
+    {
+      "id": "ea66726c-7c4c-4cfe-bdc6-3b4b5574eb41",
+      "type": "POLICY_CANCELLED",
+      "payload": {
+        "reason": "Fraud Investigation Concluded: Terminated"
+      },
+      "timestamp": "2026-04-22T08:32:23.087Z"
+    },
+    {
+      "id": "d9909406-b913-43f2-a59e-73278485c329",
+      "type": "POLICY_CANCELLED",
+      "payload": {
+        "reason": "Fraud Investigation Concluded: Terminated"
+      },
+      "timestamp": "2026-04-22T08:32:23.483Z"
+    },
+    {
+      "id": "d989f7c1-6cee-4f9e-881f-7c4de251aa29",
+      "type": "FRAUD_FLAG_CLEARED",
+      "payload": {
+        "flagId": "F-PUMP-ac2d84b1-5ed2-46ab-969a-eafd6faf3ac1"
+      },
+      "timestamp": "2026-04-22T08:32:24.433Z"
+    },
+    {
+      "id": "b47630df-aca6-40fa-8e7b-293fc461142b",
+      "type": "FRAUD_FLAG_CLEARED",
+      "payload": {
+        "flagId": "F-a884bd23-167b-4c0e-be22-edf16c624168"
+      },
+      "timestamp": "2026-04-22T08:32:25.227Z"
     }
   ]
 }

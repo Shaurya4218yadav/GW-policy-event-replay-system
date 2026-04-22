@@ -374,10 +374,7 @@ export default function DemoPage() {
           {/* Hero Section */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-accent-primary to-accent-secondary flex items-center justify-center text-2xl">
-                🎯
-              </div>
-              <h2 className="text-5xl font-black text-signal-gradient tracking-tight">
+              <h2 className="text-4xl font-black text-text-primary tracking-tight">
                 Demo Scenarios
               </h2>
             </div>
@@ -401,11 +398,8 @@ export default function DemoPage() {
 
                 {/* Category Badge */}
                 <div className="flex items-center justify-between mb-6">
-                  <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r ${scenario.color} text-white/90`}>
+                  <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r ${scenario.color} text-white`}>
                     {scenario.category}
-                  </div>
-                  <div className="text-3xl group-hover:scale-110 transition-transform duration-300">
-                    {scenario.icon}
                   </div>
                 </div>
 
@@ -436,18 +430,11 @@ export default function DemoPage() {
                 </div>
 
                 {/* Action Button */}
-                <button className="w-full relative overflow-hidden bg-gradient-to-r from-accent-primary to-accent-secondary text-black font-bold py-4 px-6 rounded-lg hover:shadow-lg hover:shadow-accent-primary/25 transition-all duration-300 group-hover:scale-105">
+                <button className="w-full relative overflow-hidden bg-[var(--bg-elevated)] border border-[var(--glass-border)] text-text-primary font-semibold py-3 px-6 rounded-lg hover:border-accent-primary/20 hover:bg-[var(--glass)] transition-all duration-300">
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    <span>▶</span>
-                    <span>Run Scenario</span>
+                    <span className="uppercase tracking-widest text-[11px]">Run Scenario</span>
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-accent-secondary to-accent-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
-
-                {/* Hover Glow Effect */}
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                  <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${scenario.color} blur-xl opacity-10`} />
-                </div>
               </div>
             ))}
           </div>

@@ -41,12 +41,12 @@ export default function SimulationPanel({ onSimulate, currentPremium, currentCov
     <div className="glass-panel p-6 rounded-2xl animate-hud-slide">
       <div className="mb-8 flex justify-between items-start">
         <div>
-          <h2 className="tool-title !text-sm flex items-center gap-3">
+          <h2 className="tool-title !text-lg flex items-center gap-3">
             <span className={`w-1.5 h-1.5 rounded-full ${isSimulating ? 'bg-status-warning animate-pulse glow-secondary' : 'bg-accent glow-primary'} transition-all duration-500`} />
-            SIMULATION_ENGINE
+            Endorsement Simulator
           </h2>
-          <div className="forensic-text mt-2 text-text-dim uppercase tracking-[0.3em] font-bold !text-[8.5px]">
-            {isSimulating ? 'EXECUTING_PREDICTIVE_MODELS...' : 'ENGINE_STATE: READY'}
+          <div className="mt-2 text-text-dim tracking-wider font-semibold text-xs">
+            {isSimulating ? 'Executing Endorsement Model...' : 'Engine State: Ready'}
           </div>
         </div>
       </div>
@@ -84,8 +84,8 @@ export default function SimulationPanel({ onSimulate, currentPremium, currentCov
              {isSimulating && (
                 <div className="w-1.5 h-1.5 rounded-full bg-status-warning animate-ping blur-[1px]" />
              )}
-             <span className="forensic-text !text-[9.5px] tracking-[0.4em] font-black text-text-primary group-hover:text-accent transition-all group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
-               {isSimulating ? 'PREDICTING_OUTCOMES...' : '[ RUN_SIMULATION_SEQUENCE ]'}
+             <span className="text-xs tracking-widest font-black text-text-primary group-hover:text-accent transition-all group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.4)] uppercase">
+               {isSimulating ? 'Predicting Outcomes...' : 'Run Premium Model'}
              </span>
           </div>
         </button>

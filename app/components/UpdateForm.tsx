@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Policy } from '@/types/policy';
 import { useAppContext } from '../context/AppContext';
+import { detectFraud } from '@/lib/fraudDetector';
 
 interface UpdateFormProps {
   policy: Policy;
@@ -12,6 +13,7 @@ interface UpdateFormProps {
 export default function UpdateForm({ policy, onUpdate }: UpdateFormProps) {
   const { events } = useAppContext();
   const [formData, setFormData] = useState<Policy>(policy);
+  const { isLocked } = detectFraud(events);
 
   // Sync state if policy prop changes externally
   useEffect(() => {
@@ -71,12 +73,24 @@ export default function UpdateForm({ policy, onUpdate }: UpdateFormProps) {
   return (
     <div className="glass-panel p-6 rounded-2xl animate-hud-slide">
       <div className="mb-8 overflow-hidden">
-        <h2 className="tool-title !text-sm flex items-center gap-3">
+        <h2 className="tool-title !text-lg flex items-center gap-3">
           <span className="w-1.5 h-1.5 rounded-full bg-accent glow-primary animate-signal-pulse" />
-          TRANSACTION_REGISTRY
+          Update Form
         </h2>
-        <div className="forensic-text mt-2 text-text-dim uppercase tracking-[0.3em] font-bold !text-[8px]">GENERATE_NEW_AUDIT_SIGNALS</div>
+        <div className="text-text-dim text-xs mt-2 tracking-wider font-semibold">Generate New Events</div>
       </div>
+      
+      {isLocked && (
+        <div className="mb-8 p-4 border border-status-error/30 bg-status-error/5 rounded-xl">
+           <div className="text-status-error font-bold tracking-widest text-[10px] mb-2 flex items-center gap-2">
+             <span className="w-1.5 h-1.5 rounded-full bg-status-error animate-ping" />
+             POLICY LOCKED
+           </div>
+           <p className="text-[10px] text-text-primary/60 font-mono">
+             Suspicious activity detected. All edit operations are halted until an Auditor reviews and clears the security flags.
+           </p>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-10">
         <div className="space-y-8">
@@ -88,7 +102,7 @@ export default function UpdateForm({ policy, onUpdate }: UpdateFormProps) {
               value={formData.name} 
               onChange={handleChange}
               className="w-full bg-transparent border-b border-white/5 py-2 text-sm forensic-text !text-text-primary focus:border-accent transition-all placeholder:text-text-dim/20"
-              placeholder="_EMPTY_STRING"
+              placeholder="Empty String"
             />
           </div>
           
@@ -152,11 +166,12 @@ export default function UpdateForm({ policy, onUpdate }: UpdateFormProps) {
 
         <button 
           type="submit" 
-          className="w-full group relative overflow-hidden h-12 border border-accent/20 hover:border-accent transition-all duration-700 rounded-full"
+          disabled={isLocked}
+          className={`w-full group relative overflow-hidden h-12 border transition-all duration-700 rounded-full ${isLocked ? 'border-status-error/20 opacity-50 cursor-not-allowed' : 'border-accent/20 hover:border-accent'}`}
         >
-          <div className="absolute inset-0 bg-signal-gradient opacity-0 group-hover:opacity-10 transition-opacity" />
-          <span className="relative forensic-text !text-[9.5px] tracking-[0.4em] font-black text-text-primary group-hover:text-accent transition-all group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
-            [ EXECUTE_FIELD_UPDATE ]
+          {!isLocked && <div className="absolute inset-0 bg-signal-gradient opacity-0 group-hover:opacity-10 transition-opacity" />}
+          <span className={`relative text-xs tracking-widest font-black uppercase group-hover:transition-all ${isLocked ? 'text-status-error' : 'text-text-primary group-hover:text-accent group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]'}`}>
+            {isLocked ? 'System Locked' : 'Execute Update'}
           </span>
         </button>
       </form>

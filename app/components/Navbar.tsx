@@ -28,7 +28,7 @@ export default function Navbar() {
 
   return (
     <nav 
-      className="fixed left-3 top-16 bottom-3 z-50 w-8 hover:w-52 bg-[#05070a] border border-white/10 rounded-xl transition-all duration-500 ease-in-out group overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]"
+      className="fixed left-3 top-16 bottom-3 z-50 w-8 hover:w-52 bg-[var(--bg-elevated)] border border-[var(--glass-border)] rounded-xl transition-all duration-500 ease-in-out group overflow-hidden shadow-xl"
     >
       {/* Collapsed Indicator Arrow */}
       <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
@@ -42,10 +42,10 @@ export default function Navbar() {
         
         {/* Role indicator */}
         <div className="mb-10 w-full px-5 flex items-center">
-          <div className="w-6 h-6 rounded-full bg-accent/5 border border-accent/20 flex items-center justify-center font-mono text-[9px] text-accent glow-primary flex-shrink-0 shadow-[0_0_10px_rgba(0,255,255,0.2)]">
+          <div className="w-6 h-6 rounded-full bg-accent/5 border border-accent/20 flex items-center justify-center font-bold text-[9px] text-accent glow-primary flex-shrink-0 shadow-[0_0_10px_rgba(0,255,255,0.2)]">
             {activeRole[0].toUpperCase()}
           </div>
-          <span className="ml-3 text-[10px] text-accent uppercase tracking-[0.2em] font-mono font-bold whitespace-nowrap">
+          <span className="ml-3 text-xs text-accent capitalize tracking-widest font-sans font-bold whitespace-nowrap">
             {activeRole}
           </span>
         </div>
@@ -61,10 +61,10 @@ export default function Navbar() {
                 className={`relative flex items-center w-full px-3 py-2.5 rounded-lg transition-all duration-300 ${
                   isActive
                     ? "bg-accent-secondary/15 text-accent-secondary border border-accent-secondary/30 shadow-[0_0_15px_rgba(139,92,246,0.15)]" 
-                    : "text-text-dim hover:bg-white/5 hover:text-text-primary border border-transparent"
+                    : "text-[var(--text-dim)] hover:bg-[var(--glass)] hover:text-[var(--text-primary)] border border-transparent"
                 }`}
               >
-                <span className={`text-[9px] uppercase tracking-[0.15em] font-bold whitespace-nowrap ${
+                <span className={`text-[11px] capitalize tracking-wider font-bold whitespace-nowrap ${
                   isActive ? "text-accent-secondary drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]" : ""
                 }`}>
                   {link.label}
@@ -89,7 +89,7 @@ export default function Navbar() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span className="ml-3 text-[9px] uppercase tracking-[0.15em] font-bold whitespace-nowrap">
+            <span className="ml-3 text-[11px] capitalize tracking-wider font-bold whitespace-nowrap">
               Logout
             </span>
           </button>

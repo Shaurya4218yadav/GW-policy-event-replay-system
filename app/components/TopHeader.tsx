@@ -33,22 +33,22 @@ export default function TopHeader() {
         </div>
         <span className="forensic-text uppercase tracking-[0.2em] flex items-center gap-4 !text-[8.5px]">
           <div className="flex items-center gap-1.5 group">
-            <span className="opacity-30 group-hover:opacity-50 transition-opacity">SYS_STATE:</span>
+            <span className="opacity-40 group-hover:opacity-60 transition-opacity tracking-wider font-bold">System State:</span>
             <span className="text-text-primary font-bold group-hover:text-accent transition-colors">{statusLabel}</span>
           </div>
           <span className="opacity-10 border-l border-white/5 h-3"></span>
           <div className="flex items-center gap-1.5 group">
-            <span className="opacity-30 group-hover:opacity-50 transition-opacity">SIGNAL_SEQ:</span>
+            <span className="opacity-40 group-hover:opacity-60 transition-opacity tracking-wider font-bold capitalize">Signal Sequence:</span>
             <span className="text-accent font-bold group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.4)] transition-all">{events.length}</span>
           </div>
           <span className="opacity-10 border-l border-white/5 h-3"></span>
           <div className="hidden sm:flex items-center gap-4">
-             <div className="flex items-center gap-1.5 group">
-                <span className="opacity-30 group-hover:opacity-50 transition-opacity">ENTROPY:</span>
+              <div className="flex items-center gap-1.5 group">
+                <span className="opacity-40 group-hover:opacity-60 transition-opacity tracking-wider font-bold capitalize">Entropy:</span>
                 <span className="text-text-secondary group-hover:text-text-primary font-medium transition-all">{entropy}%</span>
              </div>
-             <div className="flex items-center gap-1.5 group">
-                <span className="opacity-30 group-hover:opacity-50 transition-opacity">PULSE:</span>
+              <div className="flex items-center gap-1.5 group">
+                <span className="opacity-40 group-hover:opacity-60 transition-opacity tracking-wider font-bold capitalize">Pulse:</span>
                 <span className="text-text-secondary group-hover:text-text-primary font-medium transition-all">{pulseRate}%</span>
              </div>
           </div>
@@ -56,8 +56,8 @@ export default function TopHeader() {
       </div>
 
       <div className="flex items-center gap-4">
-         <span className="forensic-text opacity-30 uppercase tracking-widest hidden md:inline">
-            T_TRACE: {systemTime || "00:00:00"}
+         <span className="opacity-30 tracking-widest hidden md:inline text-xs font-semibold capitalize">
+            Time Trace: {systemTime || "00:00:00"}
          </span>
       </div>
     </header>

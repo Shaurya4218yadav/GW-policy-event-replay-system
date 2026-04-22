@@ -58,6 +58,16 @@ export function reconstructState(events: ReplayEvent[], targetTime: string) {
           if (state) state.status = 'Claim Approved';
           if (!progression.includes('Claim Approved')) progression.push('Claim Approved');
           break;
+        case 'POLICY_LOCKED':
+          if (state) state.status = 'Locked';
+          if (!progression.includes('Locked')) progression.push('Locked');
+          break;
+        case 'POLICY_UNLOCKED':
+          if (state) state.status = 'Active';
+          break;
+        case 'FRAUD_FLAG_CLEARED':
+          if (state) state.status = 'Active';
+          break;
       }
       
       steps.push({

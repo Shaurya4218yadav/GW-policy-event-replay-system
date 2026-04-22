@@ -170,10 +170,10 @@ export default function EventTimeline({ events, activeTimestamp, isFocusMode }: 
                   </div>
 
                   {/* Event Type Name */}
-                  <div className={`font-sans font-extrabold uppercase tracking-widest text-[10px] transition-all duration-300 ${
+                  <div className={`font-sans font-bold tracking-wide text-[11px] transition-all duration-300 ${
                     active ? 'text-text-primary' : 'text-text-dim opacity-40'
                   } group-hover:text-accent group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]`}>
-                    {event.type.replace(/_/g, " ")}
+                    {event.type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')}
                   </div>
 
                   {/* Reasoning Trace */}

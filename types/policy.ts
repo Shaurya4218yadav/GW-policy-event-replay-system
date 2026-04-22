@@ -3,5 +3,5 @@ export interface Policy {
   name: string;
   premium: number;
   coverageLimit: number;
-  status: 'active' | 'pending' | 'cancelled' | 'Active' | 'Draft' | 'Cancelled' | 'Claim Open' | 'Claim Approved';
+  status: 'active' | 'pending' | 'cancelled' | 'Active' | 'Draft' | 'Cancelled' | 'Claim Open' | 'Claim Approved' | 'Locked';
 }

@@ -180,16 +180,16 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
     <div className="glass-panel p-6 rounded-2xl animate-hud-slide">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h2 className="tool-title !text-sm flex items-center gap-2">
+          <h2 className="tool-title !text-lg flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            REPLAY_AUDIT_ENGINE
+            Replay Audit Engine
           </h2>
-          <div className="forensic-text mt-1 opacity-40">SIGNAL_RECONSTRUCTION_LAYER</div>
+          <div className="forensic-text mt-1 opacity-40 font-semibold tracking-wider text-xs">Signal Reconstruction Layer</div>
         </div>
         
         <div className="flex items-center gap-4">
           <label className="flex items-center cursor-pointer group">
-            <span className="mr-3 forensic-text !text-[8px] tracking-[0.2em] text-muted-foreground group-hover:text-accent transition-colors">DEBUG_TRACE</span>
+            <span className="mr-3 text-xs tracking-wider font-semibold text-muted-foreground group-hover:text-accent transition-colors">Debug Trace</span>
             <div className="relative">
               <input 
                 type="checkbox" 
@@ -247,8 +247,8 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
                 }`}
               >
                 <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <span className="relative forensic-text !text-[9px] tracking-[0.3em] font-bold text-foreground group-hover:text-accent">
-                  [ INIT_REPLAY ]
+                <span className="relative font-bold text-foreground group-hover:text-accent tracking-widest text-xs uppercase">
+                  Run Replay
                 </span>
               </button>
 
@@ -264,8 +264,8 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
                 }}
                 className="group relative overflow-hidden h-10 bg-white/[0.02] border border-white/5 hover:border-white/20 rounded-full transition-all duration-500"
               >
-                <span className="relative forensic-text !text-[8px] tracking-[0.2em] text-muted-foreground group-hover:text-foreground">
-                  EXPORT_SIGNALS
+                <span className="relative text-xs font-semibold tracking-widest text-muted-foreground group-hover:text-foreground">
+                  Export Events
                 </span>
               </button>
             </div>
@@ -276,7 +276,7 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
           <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
             {/* LIFECYCLE PROGRESSION */}
             <div className="space-y-3">
-              <div className="tool-label !text-[7px] opacity-30">LIFECYCLE_PATH_RECONSTRUCTED</div>
+              <div className="text-xs font-bold opacity-30 tracking-wider">Lifecycle Path Reconstructed</div>
               <div className="flex flex-wrap items-center gap-2">
                 {progression.map((p, i) => (
                   <React.Fragment key={p}>
@@ -293,7 +293,7 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
 
             {/* FIELD VALIDATION OVERLAYS */}
             <div className="space-y-4">
-              <div className="tool-label !text-[7px] opacity-30">FORENSIC_STATE_STREAMS</div>
+              <div className="text-xs font-bold opacity-30 tracking-wider">Forensic State Streams</div>
               <div className="grid grid-cols-1 gap-2">
                 {renderFieldValidation("Risk Premium", "premium")}
                 {renderFieldValidation("Liability Cap", "coverageLimit")}
@@ -305,8 +305,8 @@ export default function ReplayView({ events, currentPolicy, onTimeSelect }: Repl
             {isDebugMode && steps.length > 0 && (
               <div className="space-y-4 pt-6 border-t border-white/5">
                 <div className="flex justify-between items-center">
-                   <div className="tool-label !text-[7px] opacity-30">DETAILED_SIGNAL_SEQUENCE</div>
-                   <span className="forensic-text !text-[8px] opacity-20">{steps.length} SIGNALS</span>
+                   <div className="text-xs font-bold opacity-30 tracking-wider">Detailed Signal Sequence</div>
+                   <span className="text-xs font-semibold opacity-30">{steps.length} Events</span>
                 </div>
                 <div className="space-y-4 max-h-[300px] overflow-y-auto pr-4 custom-scrollbar">
                   {steps.map((step, idx) => (

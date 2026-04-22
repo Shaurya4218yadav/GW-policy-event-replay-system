@@ -1,18 +1,5 @@
 @import "tailwindcss";
 
-@theme inline {
-  --color-background: var(--bg-base);
-  --color-foreground: var(--text-primary);
-  --color-muted-foreground: var(--text-secondary);
-  --color-accent: var(--accent-primary);
-  --color-accent-secondary: var(--accent-secondary);
-  --color-status-success: var(--status-success);
-  --color-status-warning: var(--status-warning);
-  --color-status-error: var(--status-error);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 :root {
   /* Dark Theme (Default) */
   --bg-base: #05070a;
@@ -54,7 +41,7 @@ body {
   background-size: 100% 100%, 80px 80px, 80px 80px;
   background-attachment: fixed;
   color: var(--text-primary);
-  font-family: var(--font-geist-sans);
+  font-family: var(--font-inter-sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
@@ -98,7 +85,7 @@ body {
 
 /* Typography Hierarchy */
 .tool-title { 
-  font-family: var(--font-geist-sans); 
+  font-family: var(--font-inter-sans); 
   font-weight: 800; 
   letter-spacing: -0.04em; 
   font-size: 1.5rem;
@@ -108,7 +95,7 @@ body {
 }
 
 .tool-label { 
-  font-family: var(--font-geist-sans); 
+  font-family: var(--font-inter-sans); 
   font-weight: 600; 
   letter-spacing: 0.15em; 
   text-transform: uppercase; 
@@ -117,7 +104,7 @@ body {
 }
 
 .tool-value { 
-  font-family: var(--font-geist-mono); 
+  font-family: var(--font-jetbrains-mono); 
   font-weight: 500; 
   font-size: 1.25rem;
   color: var(--accent-primary);
@@ -125,7 +112,7 @@ body {
 }
 
 .forensic-text {
-  font-family: var(--font-geist-mono);
+  font-family: var(--font-inter-sans);
   font-size: 0.75rem;
   line-height: 1.6;
   color: var(--text-secondary);
@@ -136,7 +123,7 @@ body {
 input, select {
   background: transparent;
   border-bottom: 1px solid var(--glass-border);
-  font-family: var(--font-geist-mono);
+  font-family: var(--font-inter-sans);
   color: var(--text-primary);
   outline: none;
   transition: all 0.3s ease;
