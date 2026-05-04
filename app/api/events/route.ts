@@ -10,13 +10,26 @@
  */
 
 import { NextResponse } from "next/server";
-import { getEvents, addEvent, saveStore, store } from "@/lib/store";
+import { getEvents, addEvent } from "@/lib/store";
 import { enrichWithGuidewireEntity } from "@/lib/guidewireMapping";
 import { ReplayEvent } from "@/types/event";
+
+function getUserFromRequest(req: Request) {
+  const role = req.headers.get("x-user-role");
+  if (!role) return null;
+  return { role };
+}
 
 const DEFAULT_POLICY_ID = "POL-001";
 
 export async function GET(req: Request) {
+  const user = getUserFromRequest(req);
+  const allowedRoles = ["POLICYHOLDER", "AGENT", "UNDERWRITER", "AUDITOR", "ADMIN"];
+  
+  if (!user || !allowedRoles.includes(user.role)) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
   const { searchParams } = new URL(req.url);
   const policyId = searchParams.get("policyId") || DEFAULT_POLICY_ID;
   const events = getEvents(policyId);
@@ -24,6 +37,13 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const user = getUserFromRequest(req);
+  const allowedRoles = ["AGENT", "UNDERWRITER", "ADMIN"];
+  
+  if (!user || !allowedRoles.includes(user.role)) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
   const body = await req.json();
   const policyId = body.policyId || DEFAULT_POLICY_ID;
 

@@ -6,25 +6,25 @@ import { usePathname } from "next/navigation";
 import { useAppContext } from "../context/AppContext";
 
 const NAV_LINKS = [
-  { label: "Overview", href: "/overview", roles: ["user", "analyst", "auditor", "admin", null] },
-  { label: "Dashboard", href: "/dashboard", roles: ["user", "analyst", "admin"] },
-  { label: "Simulation", href: "/simulation", roles: ["user", "analyst", "admin"] },
-  { label: "Demo", href: "/demo", roles: ["user", "analyst", "auditor", "admin", null] },
-  { label: "Validation", href: "/validation", roles: ["user", "analyst", "auditor", "admin", null] },
-  { label: "Monitoring", href: "/monitoring", roles: ["user", "analyst", "auditor", "admin", null] },
-  { label: "Mock", href: "/mock", roles: ["user", "analyst", "auditor", "admin", null] },
-  { label: "Docs", href: "/docs", roles: ["user", "analyst", "auditor", "admin", null] },
-  { label: "Audit", href: "/audit", roles: ["auditor", "admin"] },
-  { label: "Settings", href: "/settings", roles: ["user", "analyst", "auditor", "admin"] },
+  { label: "Overview", href: "/overview", roles: ["POLICYHOLDER", "AGENT", "UNDERWRITER", "AUDITOR", "ADMIN", null] },
+  { label: "Dashboard", href: "/dashboard", roles: ["AGENT", "UNDERWRITER", "ADMIN"] },
+  { label: "Simulation", href: "/simulation", roles: ["AGENT", "UNDERWRITER", "ADMIN"] },
+  { label: "Demo", href: "/demo", roles: ["POLICYHOLDER", "AGENT", "UNDERWRITER", "AUDITOR", "ADMIN", null] },
+  { label: "Validation", href: "/validation", roles: ["AUDITOR", "ADMIN"] },
+  { label: "Monitoring", href: "/monitoring", roles: ["AGENT", "UNDERWRITER", "AUDITOR", "ADMIN", null] },
+  { label: "Mock", href: "/mock", roles: ["ADMIN", null] },
+  { label: "Docs", href: "/docs", roles: ["POLICYHOLDER", "AGENT", "UNDERWRITER", "AUDITOR", "ADMIN", null] },
+  { label: "Audit", href: "/audit", roles: ["AUDITOR", "ADMIN"] },
+  { label: "Settings", href: "/settings", roles: ["POLICYHOLDER", "AGENT", "UNDERWRITER", "AUDITOR", "ADMIN"] },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { role, logout } = useAppContext();
+  const { user, logout } = useAppContext();
 
   if (pathname === "/login") return null;
 
-  const activeRole = role || "guest";
+  const activeRole = user?.role || "GUEST";
 
   return (
     <nav 
@@ -52,7 +52,7 @@ export default function Navbar() {
 
         {/* Navigation links */}
         <div className="flex-1 flex-col space-y-1 flex mt-2 w-full px-3">
-          {NAV_LINKS.filter(l => l.roles.includes(role as string | null)).map((link) => {
+          {NAV_LINKS.filter(l => l.roles.includes(user?.role as any)).map((link) => {
             const isActive = pathname === link.href;
             return (
               <Link

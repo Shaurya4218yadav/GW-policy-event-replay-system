@@ -108,7 +108,6 @@ export async function POST(req: Request) {
   // ── Streaming response ───────────────────────────────────────────────
   if (streaming) {
     // Return a streaming response that sends events with delays.
-    // Client should consume as Server-Sent Events (SSE).
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -117,9 +116,7 @@ export async function POST(req: Request) {
           const data = `data: ${JSON.stringify(event)}\n\n`;
           controller.enqueue(encoder.encode(data));
 
-          // Simulate real-time delay between events (500–1200ms)
-          // Using deterministic delays based on index to maintain testability
-          const delay = 500 + (i * 175); // 500, 675, 850, 1025ms
+          const delay = 500 + (i * 175);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
@@ -149,8 +146,6 @@ export async function POST(req: Request) {
   });
 }
 
-// ── Event Builder ────────────────────────────────────────────────────────
-
 function buildEvent(
   type: ReplayEvent["type"],
   policyId: string,
@@ -173,18 +168,12 @@ function buildEvent(
   };
 }
 
-// ── Failure Simulation ───────────────────────────────────────────────────
-// Modifies the event array to simulate real-world failure scenarios.
-// The replay engine should still reconstruct deterministically and
-// flag anomalies/drift appropriately.
-
 function applyFailureSimulation(
   events: ReplayEvent[],
   failureType: FailureType
 ): ReplayEvent[] {
   switch (failureType) {
     case "MISSING_EVENT":
-      // Remove the second event (index 1) to simulate a gap
       if (events.length > 1) {
         const result = [...events];
         result.splice(1, 1);
@@ -193,15 +182,12 @@ function applyFailureSimulation(
       return events;
 
     case "DUPLICATE":
-      // Duplicate the first event to simulate double-ingestion
       if (events.length > 0) {
         return [events[0], ...events];
       }
       return events;
 
     case "OUT_OF_ORDER":
-      // Reverse the event order to simulate out-of-order arrival
-      // The replay engine's deterministic sort should handle this
       return [...events].reverse();
 
     default:

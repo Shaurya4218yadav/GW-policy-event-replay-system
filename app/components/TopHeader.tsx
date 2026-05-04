@@ -5,7 +5,7 @@ import { useAppContext } from "../context/AppContext";
 import { usePathname } from "next/navigation";
 
 export default function TopHeader() {
-  const { events, systemTime, role, policy } = useAppContext();
+  const { events, systemTime, user, policy } = useAppContext();
   const pathname = usePathname();
   
   const isOverview = pathname === "/overview";
@@ -15,7 +15,7 @@ export default function TopHeader() {
   const entropy = events.length > 0 ? (uniqueTypes / events.length * 100).toFixed(0) : "0";
   const pulseRate = events.length > 0 ? Math.min(100, events.length * 5) : 0; 
 
-  if ((!role && !isOverview) || pathname === "/login") return null;
+  if ((!user && !isOverview) || pathname === "/login") return null;
 
   // Determine System Status from policy state
   const isError = policy.status.toLowerCase() === 'cancelled';

@@ -6,12 +6,23 @@ import { useRouter } from "next/navigation";
 import { Policy } from "@/types/policy";
 import { ReplayEvent } from "@/types/event";
 
-export type UserRole = "user" | "analyst" | "auditor" | "admin" | null;
+export type Role =
+  | "POLICYHOLDER"
+  | "AGENT"
+  | "UNDERWRITER"
+  | "AUDITOR"
+  | "ADMIN";
+
+export type User = {
+  id?: string;
+  role: Role;
+};
+
 export type Theme = "light" | "dark";
 
 interface AppContextType {
-  role: UserRole;
-  setRole: (role: UserRole) => void;
+  user: User | null;
+  setUser: (user: User | null) => void;
   policy: Policy;
   setPolicy: (policy: Policy) => void;
   syncPolicy: (policy: Policy) => Promise<void>;
@@ -54,12 +65,13 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [role, setRole] = useState<UserRole>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const [policy, setPolicy] = useState<Policy>(initialPolicy);
   const [events, setEvents] = useState<ReplayEvent[]>([initialEvent]);
   const [theme, setTheme] = useState<Theme>("dark");
   const [systemTime, setSystemTime] = useState(() => new Date().toLocaleTimeString([], { hour12: false }));
+  const [hydrated, setHydrated] = useState(false);
 
   // Live clock
   useEffect(() => {
@@ -68,8 +80,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }, 1000);
     return () => clearInterval(interval);
   }, []);
-
-  const [hydrated, setHydrated] = useState(false);
 
   const fetchInitialData = useCallback(async () => {
     if (!user?.role) return;
@@ -142,7 +152,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPolicy(newPolicy);
     await fetch("/api/policy", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...(user?.role ? { "x-user-role": user.role } : {})
+      },
       body: JSON.stringify(newPolicy),
     });
   };
@@ -152,7 +165,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     for (const event of newEvents) {
       await fetch("/api/events", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(user?.role ? { "x-user-role": user.role } : {})
+        },
         body: JSON.stringify(event),
       });
     }
@@ -162,21 +178,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setEvents(prev => [...prev, event]);
     await fetch("/api/events", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...(user?.role ? { "x-user-role": user.role } : {})
+      },
       body: JSON.stringify(event),
     });
   };
 
   const logout = () => {
-    setRole(null);
+    setUser(null);
+    localStorage.removeItem("app-user");
     router.push("/login");
   };
-
 
   return (
     <AppContext.Provider
       value={{
-        role, setRole,
+        user, setUser,
         policy, setPolicy, syncPolicy,
         events, setEvents, syncEvents,
         theme, setTheme, toggleTheme,

@@ -6,7 +6,7 @@ import EventTimeline from "../components/EventTimeline";
 import { Policy } from "@/types/policy";
 
 export default function AuditPage() {
-  const { events, policy, role, logout } = useAppContext();
+  const { events, policy, user, logout } = useAppContext();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -72,7 +72,7 @@ export default function AuditPage() {
     );
   };
 
-  if (role !== "auditor" && role !== "admin") {
+  if (user?.role !== "AUDITOR" && user?.role !== "ADMIN") {
     return (
       <div className="p-32 text-center forensic-text uppercase tracking-[0.4em] text-text-dim/60 font-black flex flex-col items-center gap-8">
         <div className="w-16 h-px bg-status-error/40 glow-secondary" />

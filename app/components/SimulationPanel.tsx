@@ -11,6 +11,7 @@ interface SimulationPanelProps {
 export default function SimulationPanel({ onSimulate, currentPremium, currentCoverage }: SimulationPanelProps) {
   const [selectedScenario, setSelectedScenario] = useState('claim');
   const [isSimulating, setIsSimulating] = useState(false);
+  const { user } = useAppContext();
 
   const handleRunSimulation = async () => {
     setIsSimulating(true);
@@ -18,7 +19,10 @@ export default function SimulationPanel({ onSimulate, currentPremium, currentCov
     try {
       const res = await fetch("/api/simulation", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(user?.role ? { "x-user-role": user.role } : {})
+        },
         body: JSON.stringify({ 
           scenario: selectedScenario,
           currentPremium,
@@ -42,12 +46,12 @@ export default function SimulationPanel({ onSimulate, currentPremium, currentCov
     <div className="glass-panel p-6 rounded-2xl animate-hud-slide">
       <div className="mb-8 flex justify-between items-start">
         <div>
-          <h2 className="tool-title !text-sm flex items-center gap-3">
-            <span className={`w-1.5 h-1.5 rounded-full ${isSimulating ? 'bg-status-warning animate-pulse glow-secondary' : 'bg-accent glow-primary'} transition-all duration-500`} />
-            SIMULATION_ENGINE
+          <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-3">
+            <span className={`w-1.5 h-1.5 rounded-full ${isSimulating ? 'bg-accent-secondary animate-pulse' : 'bg-accent-primary'} transition-all duration-500`} />
+            Simulation Engine
           </h2>
-          <div className="forensic-text mt-2 text-text-dim uppercase tracking-[0.3em] font-bold !text-[8.5px]">
-            {isSimulating ? 'EXECUTING_PREDICTIVE_MODELS...' : 'ENGINE_STATE: READY'}
+          <div className="text-[var(--text-muted)] text-[11px] font-medium tracking-wide mt-2">
+            {isSimulating ? 'Executing predictive models...' : 'Engine state: Ready'}
           </div>
         </div>
       </div>
@@ -57,7 +61,7 @@ export default function SimulationPanel({ onSimulate, currentPremium, currentCov
           <label className="tool-label block mb-2 opacity-30 group-hover:opacity-100 transition-opacity">Predictive Scenario Profile</label>
           <div className="relative">
             <select 
-              className="w-full bg-transparent border-b border-white/5 py-3 text-[11px] forensic-text !text-text-primary focus:border-accent transition-all appearance-none cursor-pointer tracking-wider font-bold"
+              className="w-full bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-md py-2.5 px-4 text-[12px] text-[var(--text-primary)] focus:border-accent-primary transition-all appearance-none cursor-pointer"
               value={selectedScenario}
               onChange={(e) => setSelectedScenario(e.target.value)}
               disabled={isSimulating}
@@ -65,7 +69,7 @@ export default function SimulationPanel({ onSimulate, currentPremium, currentCov
               <option value="claim">Accident Claim Workflow</option>
               <option value="endorsement">Coverage Enhancement Path</option>
             </select>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-20 group-hover:text-accent group-hover:opacity-100 transition-all">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-20 group-hover:text-accent-primary group-hover:opacity-100 transition-all">
               <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
                 <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
               </svg>
@@ -76,17 +80,16 @@ export default function SimulationPanel({ onSimulate, currentPremium, currentCov
         <button 
           onClick={handleRunSimulation}
           disabled={isSimulating}
-          className={`w-full group relative overflow-hidden h-12 border rounded-full transition-all duration-700 ${
-            isSimulating ? 'border-status-warning/20 opacity-60 cursor-not-allowed' : 'border-accent/20 hover:border-accent'
+          className={`w-full group relative overflow-hidden h-10 transition-all duration-300 ${
+            isSimulating ? 'bg-[var(--bg-panel)] border border-[var(--border-subtle)] opacity-60 cursor-not-allowed rounded-md' : 'btn-primary rounded-md'
           }`}
         >
-          <div className={`absolute inset-0 ${isSimulating ? 'bg-status-warning/5 animate-pulse' : 'bg-signal-gradient opacity-0 group-hover:opacity-10'} transition-all`} />
-          <div className="relative flex items-center justify-center gap-4">
+          <div className="relative flex items-center justify-center gap-3">
              {isSimulating && (
-                <div className="w-1.5 h-1.5 rounded-full bg-status-warning animate-ping blur-[1px]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-accent-secondary animate-ping" />
              )}
-             <span className="forensic-text !text-[9.5px] tracking-[0.4em] font-black text-text-primary group-hover:text-accent transition-all group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
-               {isSimulating ? 'PREDICTING_OUTCOMES...' : '[ RUN_SIMULATION_SEQUENCE ]'}
+             <span className={`text-[12px] font-bold transition-all ${isSimulating ? 'text-[var(--text-muted)]' : 'text-black'}`}>
+               {isSimulating ? 'Predicting...' : 'Run Simulation'}
              </span>
           </div>
         </button>

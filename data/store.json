@@ -474,6 +474,71 @@
           "sequence": 32
         },
         "guidewireEntity": "PolicyCenter.Quote"
+      },
+      {
+        "id": "2f8c4597-7384-4eb7-880f-f6cf6946134c",
+        "type": "CLAIM_REPORTED",
+        "policyId": "POL-001",
+        "source": "SYSTEM",
+        "reasoning": "Accident claim reported by policyholder via mobile app",
+        "timestamp": "2026-05-04T19:38:20.669Z",
+        "metadata": {
+          "actor": "SimulationEngine",
+          "correlationId": "sim-1777923499674",
+          "sequence": 33
+        },
+        "guidewireEntity": "ClaimCenter.Claim"
+      },
+      {
+        "id": "f37c5db1-1013-4aa7-96aa-819410b94fb3",
+        "type": "CLAIM_APPROVED",
+        "policyId": "POL-001",
+        "source": "SYSTEM",
+        "reasoning": "Claim approved by adjuster after damage assessment",
+        "payload": {
+          "payout": 5000
+        },
+        "timestamp": "2026-05-04T19:38:21.669Z",
+        "metadata": {
+          "actor": "SimulationEngine",
+          "correlationId": "sim-1777923499674",
+          "sequence": 34
+        },
+        "guidewireEntity": "ClaimCenter.ClaimApproval"
+      },
+      {
+        "id": "f94970f5-94ac-4dd2-b6e7-6b4511d8c690",
+        "type": "POLICY_QUOTED",
+        "policyId": "POL-001",
+        "source": "SYSTEM",
+        "reasoning": "Post-claim premium adjustment: base 1000 + 3000 surcharge",
+        "payload": {
+          "premium": 4000
+        },
+        "timestamp": "2026-05-04T19:38:22.669Z",
+        "metadata": {
+          "actor": "SimulationEngine",
+          "correlationId": "sim-1777923499674",
+          "sequence": 35
+        },
+        "guidewireEntity": "PolicyCenter.Quote"
+      },
+      {
+        "id": "7396746d-aafe-4adf-8c6e-76401f55b203",
+        "type": "POLICY_ENDORSED",
+        "policyId": "POL-001",
+        "source": "SYSTEM",
+        "reasoning": "Premium endorsement applied following claim approval",
+        "payload": {
+          "premium": 4000
+        },
+        "timestamp": "2026-05-04T19:38:23.669Z",
+        "metadata": {
+          "actor": "SimulationEngine",
+          "correlationId": "sim-1777923499674",
+          "sequence": 36
+        },
+        "guidewireEntity": "PolicyCenter.Endorsement"
       }
     ],
     "POL-123": []
@@ -483,7 +548,7 @@
     "POL-123": []
   },
   "sequences": {
-    "POL-001": 32,
+    "POL-001": 36,
     "POL-123": 0
   }
 }
