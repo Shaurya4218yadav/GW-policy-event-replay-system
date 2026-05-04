@@ -37,7 +37,20 @@ interface SimulationRequest {
   failureType?: FailureType;
 }
 
+function getUserFromRequest(req: Request) {
+  const role = req.headers.get("x-user-role");
+  if (!role) return null;
+  return { role };
+}
+
 export async function POST(req: Request) {
+  const user = getUserFromRequest(req);
+  const allowedRoles = ["AGENT", "UNDERWRITER", "ADMIN"];
+  
+  if (!user || !allowedRoles.includes(user.role)) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
   const body: SimulationRequest = await req.json();
   const {
     scenario,

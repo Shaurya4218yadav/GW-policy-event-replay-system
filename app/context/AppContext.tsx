@@ -69,12 +69,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, []);
 
-  const fetchInitialData = async () => {
+  const [hydrated, setHydrated] = useState(false);
+
+  const fetchInitialData = useCallback(async () => {
+    if (!user?.role) return;
+    
     try {
+      const headers = { "x-user-role": user.role };
       const [policyRes, eventsRes] = await Promise.all([
-        fetch("/api/policy"),
-        fetch("/api/events")
+        fetch("/api/policy", { headers }),
+        fetch("/api/events", { headers })
       ]);
+      
+      if (!policyRes.ok || !eventsRes.ok) {
+        if (policyRes.status === 403 || eventsRes.status === 403) {
+          console.warn("Access forbidden. User might not have correct role.");
+          return;
+        }
+        throw new Error("Failed to fetch initial data");
+      }
+      
       const policyData = await policyRes.json();
       const eventsData = await eventsRes.json();
       setPolicy(policyData);
@@ -82,13 +96,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to sync with backend store:", error);
     }
-  };
+  }, [user?.role]);
 
+  // Handle Hydration
   useEffect(() => {
-    fetchInitialData();
     const storedTheme = localStorage.getItem("app-theme") as Theme;
     if (storedTheme) setTheme(storedTheme);
+    
+    try {
+      const storedUser = localStorage.getItem("app-user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (e) {
+      console.error("Failed to parse user from localStorage");
+    } finally {
+      setHydrated(true);
+    }
   }, []);
+
+  // Fetch data when user or hydration changes
+  useEffect(() => {
+    if (hydrated && user) {
+      fetchInitialData();
+    }
+  }, [hydrated, user, fetchInitialData]);
 
   useEffect(() => {
     const root = document.documentElement;
